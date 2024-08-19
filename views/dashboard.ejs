@@ -1,16 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
-    <script> Highcharts.setOptions({credits: {enabled: false}});</script>
 
     <link rel="preload" href="images/inactive_home.png" as="image">
     <link rel="preload" href="images/active_home.png" as="image">
@@ -19,19 +12,13 @@
     <link rel="preload" href="images/inactive_settings.png" as="image">
     <link rel="preload" href="images/active_settings.png" as="image">
     <link rel="stylesheet" type="text/css" href="css/style.css" />
-  </head>
+</head>
 
+<body>
 
-  <body>
-
-    <header class="header">
-    <div class="logo">
-        <a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a>
-    </div>
-    <div class="title-container">
-        <a href="/"><h1 class="title">NEO-ATF</h1></a>
-        <p>Automatic Testing Framework</p>
-    </div>
+<header class="header">
+    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
+    <div class="title-container"><h1 class="title">NEO-ATF</h1><p>Automatic Testing Framework</p></div>
 
     <div class="menu-container">
         <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -52,9 +39,8 @@
                 <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
             </div>
         </a>
-    </div>            
-        
-    </header>
+    </div>                 
+</header>
     
     <div class="container progress-bar-container">
         <div id="current-time"><%= currentTime %></div>
@@ -91,7 +77,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-
     function pollProgress() {
     const intervalId = setInterval(() => {
         fetch('/pipeline-progress')
@@ -117,7 +102,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 1000); // 1 second
     }
 
-
     function fetchCompletionTime() {
         fetch('/completion-time')
             .then(response => response.json())
@@ -140,14 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     function updateTime() {
-        const now = new Date().toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric'
-        });
+        const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
         document.getElementById('current-time').textContent = '현재 시각 : ' + now;
     }
 
@@ -155,71 +132,28 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchHelixSummary();
     fetchCodeSonarSummary();
     fetchVectorCASTSummary();
-    fetchGitStats();
     }
 
-    function updateHelixResults(helixSummary, helixRate) {
+    function updateHelixResults(helixSummary) {
     if (helixSummary) {
         document.querySelector('.helix-summary h1').textContent = helixSummary.rulesWithViolations;
         const rateElement = document.querySelector('.helix-summary h3');
-
-        if (helixRate > 0) {
-            rateElement.textContent = `+ ${helixRate.toFixed(1)}% 증가`;
-            rateElement.classList.add('rate-increase');
-            rateElement.classList.remove('rate-decrease', 'rate-no-change');
-        } else if (helixRate < 0) {
-            rateElement.textContent = `${helixRate.toFixed(1)}% 감소`;
-            rateElement.classList.add('rate-decrease');
-            rateElement.classList.remove('rate-increase', 'rate-no-change');
-        } else {
-            rateElement.textContent = '0%';
-            rateElement.classList.add('rate-no-change');
-            rateElement.classList.remove('rate-increase', 'rate-decrease');
-        }
     } else {
     }
 }
 
-function updateCodeSonarResults(codesonarSummary, codesonarRate) {
+function updateCodeSonarResults(codesonarSummary) {
     if (codesonarSummary) {
         document.querySelector('.codesonar-summary h1').textContent = codesonarSummary.activeWarnings;
         const rateElement = document.querySelector('.codesonar-summary h3');
-
-        if (codesonarRate > 0) {
-            rateElement.textContent = `+ ${codesonarRate.toFixed(1)}% 증가`;
-            rateElement.classList.add('rate-increase');
-            rateElement.classList.remove('rate-decrease', 'rate-no-change');
-        } else if (codesonarRate < 0) {
-            rateElement.textContent = `${codesonarRate.toFixed(1)}% 감소`;
-            rateElement.classList.add('rate-decrease');
-            rateElement.classList.remove('rate-increase', 'rate-no-change');
-        } else {
-            rateElement.textContent = '0%';
-            rateElement.classList.add('rate-no-change');
-            rateElement.classList.remove('rate-increase', 'rate-decrease');
-        }
     } else {
     }
 }
 
-function updateVectorCASTResults(vectorCASTSummary, vectorCASTRate) {
+function updateVectorCASTResults(vectorCASTSummary) {
     if (vectorCASTSummary) {
         document.querySelector('.vectorcast-summary h1').textContent = vectorCASTSummary.passFail;
         const rateElement = document.querySelector('.vectorcast-summary h3');
-
-        if (vectorCASTRate > 0) {
-            rateElement.textContent = `+ ${vectorCASTRate.toFixed(1)}% 증가`;
-            rateElement.classList.add('rate-increase');
-            rateElement.classList.remove('rate-decrease', 'rate-no-change');
-        } else if (vectorCASTRate < 0) {
-            rateElement.textContent = `${vectorCASTRate.toFixed(1)}% 감소`;
-            rateElement.classList.add('rate-decrease');
-            rateElement.classList.remove('rate-increase', 'rate-no-change');
-        } else {
-            rateElement.textContent = '0%';
-            rateElement.classList.add('rate-no-change');
-            rateElement.classList.remove('rate-increase', 'rate-decrease');
-        }
     } else {
     }
 }
@@ -227,114 +161,41 @@ function updateVectorCASTResults(vectorCASTSummary, vectorCASTRate) {
     function fetchHelixSummary() {
         fetch('/helix-summary')
             .then(response => response.json())
-            .then(data => {
-                updateHelixResults(data.helixSummary, data.helixRate);
-            })
-            .catch(error => {
-                console.error('Error fetching Helix summary:', error.message);
-            });
+            .then(data => {updateHelixResults(data.helixSummary, data.helixRate);})
+            .catch(error => {console.error('Error fetching Helix summary:', error.message);});
     }
 
     function fetchCodeSonarSummary() {
         fetch('/codesonar-summary')
             .then(response => response.json())
-            .then(data => {
-                updateCodeSonarResults(data.codesonarSummary, data.codesonarRate);
-            })
-            .catch(error => {
-                console.error('Error fetching CodeSonar summary:', error.message);
-            });
+            .then(data => {updateCodeSonarResults(data.codesonarSummary, data.codesonarRate);})
+            .catch(error => {console.error('Error fetching CodeSonar summary:', error.message);});
     }
 
     function fetchVectorCASTSummary() {
         fetch('/vectorcast-summary')
             .then(response => response.json())
-            .then(data => {
-                updateVectorCASTResults(data.vectorCASTSummary, data.vectorCASTRate);
-            })
-            .catch(error => {
-                console.error('Error fetching VectorCAST summary:', error.message);
-            });
-    }
-    function fetchGitStats() {
-    fetch('/git-stats')
-        .then(response => response.json())
-        .then(data => {
-            updateGitStats(data);
-        })
-        .catch(error => {
-            console.error('Error fetching Git stats:', error.message);
-        });
-}
-
-    function updateGitStats(gitStats) {
-        if (gitStats) {
-            document.querySelector('.sourcecode p:nth-child(2)').textContent = `업데이트 : ${gitStats.commits}번째`;
-            document.querySelector('.sourcecode p:nth-child(4)').textContent = `작성자 : ${gitStats.latestCommitAuthor}`;
-            document.querySelector('.sourcecode p:nth-child(5)').textContent = `파일 : ${gitStats.numberOfFiles}개`;
-            document.querySelector('.sourcecode p:nth-child(3)').textContent = `최근 수정 시각 : ${gitStats.latestCommitDate}`;
-
-            const languageList = document.querySelector('.sourcecode ul');
-            languageList.innerHTML = '';
-
-            for (const [language, lines] of Object.entries(gitStats.languages)) {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${language}: ${lines} lines`;
-                languageList.appendChild(listItem);
-            }
-        }
+            .then(data => {updateVectorCASTResults(data.vectorCASTSummary, data.vectorCASTRate);})
+            .catch(error => {console.error('Error fetching VectorCAST summary:', error.message);});
     }
 
 </script>
     
     <div class="container">
+
         <div class="card third-width <%= helixSummary ? '' : 'third-width-inactive' %>">
             <% if (helixSummary) { %>
-                <div>
-                    <h1 class="card-title">Helix QAC</h1>
-                </div>
-                <div>
-                    <h1 class="card-big-number"><%= helixSummary.rulesWithViolations %></h1>
-                    <div><h3 class="card-subtitle">Rules with Violations</h3></div>
-                    <% if (helixRate > 0) { %>
-                        <h3 class="rate-increase">+ <%= helixRate.toFixed(1) %>% 증가</h3>
-                    <% } else if (helixRate < 0) { %>
-                        <h3 class="rate-decrease"><%= helixRate.toFixed(1) %>% 감소</h3>
-                    <% } else { %>
- <!--                     <h3 class="rate-no-change">증감없음</h3>                 -->
-                        <h3 class="rate-decrease">- 1.8% 감소</h3>    
-                    <% } %>
-                </div>
+                <div><h1 class="card-title">Helix QAC</h1></div>
             <% } else { %>
-                <div class="inactive">
-                    <h2>Helix QAC</h2>
-                    <p>Not Available</p>
-                </div>
+                <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
             <% } %>
         </div>
         
         <div class="card third-width <%= codesonarSummary ? '' : 'third-width-inactive' %>">
             <% if (codesonarSummary) { %>
-                <div>
-                    <h1 class="card-title">CodeSonar</h1>
-                </div>
-                <div>
-                    <h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1>
-                    <div><h3 class="card-subtitle">Active Warnings</h3></div>
-                    <% if (codesonarRate > 0) { %>
-                        <h3 class="rate-increase">+ <%= codesonarRate.toFixed(1) %>% 증가</h3>
-                    <% } else if (codesonarRate < 0) { %>
-                        <h3 class="rate-decrease"><%= codesonarRate.toFixed(1) %>% 감소</h3>
-                    <% } else { %>
- <!--                     <h3 class="rate-no-change">증감없음</h3>                 -->
-                        <h3 class="rate-increase">+ 2.5% 증가</h3>    
-                    <% } %>
-                </div>
+                <div><h1 class="card-title">CodeSonar</h1></div>
             <% } else { %>
-                <div class="inactive">
-                    <h2>CodeSonar</h2>
-                    <p>Not Available</p>
-                </div>
+                <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
             <% } %>
         </div>
         
@@ -344,560 +205,16 @@ function updateVectorCASTResults(vectorCASTSummary, vectorCASTRate) {
                     <h1 class="card-title">VectorCAST</h1>
                 </div>
                 <div>
-                        <h1 class="card-big-number">
-                            <%= vectorCASTSummary.passFail %>
-                        </h1>
-
-                    <div><h3 class="card-subtitle">Pass / Fail</h3></div>
-                    <% if (vectorCASTRate > 0) { %>
-                        <h3 class="rate-increase">+ <%= vectorCASTRate.toFixed(1) %>% 증가</h3>
-                    <% } else if (vectorCASTRate < 0) { %>
-                        <h3 class="rate-decrease"><%= vectorCASTRate.toFixed(1) %>% 감소</h3>
-                    <% } else { %>
-                        <h3 class="rate-no-change">증감 없음</h3>
-                    <% } %>
+                    <h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1>
                 </div>
             <% } else { %>
-                <div class="inactive">
-                    <h2>VectorCAST</h2>
-                    <p>Not Available</p>
-                </div>
+                <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
             <% } %>
         </div>
         
-        
-    </div>
     
-<div class="container">
-    <div class="card full-width content-chart <%= helixSummary ? '' : 'full-width-inactive' %>">
-        <% if (helixSummary) { %>
-            <div class="text-section">
-                <h1>HelixQAC 분석 결과</h1>
-                <h2>전체 분석 코드 : <%= helixSummary.total %> lines</h2>
-                <h2>위반 탐지 코드 : <%= helixSummary.violations %> lines</h2>
-                <h2>코드 위반율 : <%= (helixSummary.violationsRatio * 100).toFixed(2) %> %</h2>
-                <h2>룰 위반 : <%= helixSummary.rulesWithViolations %>개</h2>
-                <h2>룰 위반율 : <%= (helixSummary.rulesComplianceRatio * 100).toFixed(2) %> %</h2>
-                <h2>파싱 오류: <%= helixSummary.parserErrors %></h2>
-                <h2>최근 분석 시각 : <%= helixSummary.lastAnalysisDateTime %></h2>
-                <% if (latestHelixReportLink) { %>
-                    <button type="button" onclick="window.open('/report', '_blank')">자세히 보기</button>
-                <% } else { %>
-                    <p>No HelixQAC report found.</p>
-                <% } %>
-            </div>
-            <div class="chart-section">
-                <figure class="highcharts-figure">
-                    <div id="chart-helixqac"></div>
-                </figure>
-            </div>
-        <% } else { %>
-            <div class="inactive">
-                <h2>Helix QAC Analysis</h2>
-                <p>Not Available</p>
-            </div>
-        <% } %>
     </div>
-
-    <div class="card full-width content-chart <%= codesonarSummary ? '' : 'full-width-inactive' %>">
-        <% if (codesonarSummary) { %>
-            <div class="text-section">
-                <h1>CodeSonar 분석 결과</h1>
-                <h2>경고 탐지 파일 : <%= codesonarSummary.total %>개</h2>
-                <h2>수정 필요 파일 : <%= codesonarSummary.activeWarnings %>개</h2>
-                <h2>보안 규칙 위반율 : <%= codesonarSummary.securityBreachRatio.toFixed(2) %> %</h2>
-                <h2>최근 분석 시각 : <%= codesonarSummary.lastRunTime %></h2>
-                <div class="security-violation">
-                    <h3>보안 규칙 위반 클래스</h3>
-                    <ul>
-                    <% if (Object.keys(codesonarSummary.specificWarningsCounts).length === 0) { %>
-                    <li>No specific warnings found.</li>
-                    <% } else { %>
-                        <% for (const [warningType, count] of Object.entries(codesonarSummary.specificWarningsCounts)) { %>
-                    <li><%= warningType %>: <%= count %></li>
-                        <% } %>
-                    <% } %>
-                    </ul>
-                </div>
-                <button type="button" onclick="window.open('/codesonar', '_blank')">자세히 보기</button>
-            </div>
-            <div class="chart-section">
-                <figure class="highcharts-figure">
-                    <div id="chart-codesonar"></div>
-                </figure>
-            </div>
-        <% } else { %>
-            <div class="inactive">
-                <h2>CodeSonar Analysis</h2>
-                <p>Not Available</p>
-            </div>
-        <% } %>
-    </div>
-
-    <div class="card full-width content-chart <%= vectorCASTSummary ? '' : 'full-width-inactive' %>">
-        <% if (vectorCASTSummary) { %>
-            <div class="text-section">
-                <h1>VectorCAST 분석 결과</h1>
-                <h2>테스트케이스 : <%= vectorCASTSummary.passFail %></h2>
-                <h2>구문 커버리지 : <%= vectorCASTSummary.statementCoverage %></h2>
-                <h2>브랜치 커버리지 : <%= vectorCASTSummary.branchCoverage %></h2>
-                <h2>페어 커버리지 : <%= vectorCASTSummary.pairsCoverage %></h2>
-                <h2>최근 분석 시각 : <%= vectorCASTSummary.created %></h2>
-                <% if (latestHelixReportLink) { %>
-                    <button type="button" onclick="window.open('/vectorcast', '_blank')">자세히 보기</button>
-                <% } else { %>
-                    <p>No VectorCAST report found.</p>
-                <% } %>
-            </div>
-            <div class="chart-section">
-                <figure class="highcharts-figure">
-                    <div id="chart-vectorcast"></div>
-                </figure>
-            </div>
-        <% } else { %>
-            <div class="inactive">
-                <h2>VectorCAST Analysis</h2>
-                <p>Not Available</p>
-            </div>
-        <% } %>
-    </div>
-
-    <div class="card full-width content-chart">
-        <div class="text-section sourcecode">
-            <h2>소스코드 정보</h2>
-            <p>업데이트 : <%= gitStats.commits %>번째</p>
-            <p>작성자 : <%= gitStats.latestCommitAuthor %></p>
-            <p>파일 : <%= gitStats.numberOfFiles %>개</p>
-            <p>사용 언어 :</p>
-            <ul>
-                <% for (const [language, lines] of Object.entries(gitStats.languages)) { %>
-                    <li><%= language %>: <%= lines %> lines</li>
-                <% } %>
-            </ul>
-            <p>최근 수정 시각 : <%= gitStats.latestCommitDate %></p>
-        </div>
-        <div class="chart-section">
-            <figure class="highcharts-figure">
-                <div id="chart-sourcecode"></div>
-            </figure>
-        </div>
-    </div>
-    
-</div>
-
-
-<script>
-
-document.addEventListener('DOMContentLoaded', function () {
-
-// helixqac
-    Highcharts.chart('chart-helixqac', {
-    chart: {
-        type: 'gauge',
-        plotBackgroundColor: null,
-        plotBackgroundImage: null,
-        plotBorderWidth: 0,
-        plotShadow: false,
-        height: '100%'
-    },
-    title: {
-        text: '룰 준수/위반 통계'
-    },
-    pane: {
-        startAngle: -90,
-        endAngle: 89.9,
-        background: null,
-        center: ['50%', '75%'],
-        size: '110%'
-    },
-    yAxis: {
-        min: 0,
-        max: 100,
-        tickPixelInterval: 59.6,
-        tickPosition: 'inside',
-        tickColor: Highcharts.defaultOptions.chart.backgroundColor || '#FFFFFF',
-        tickLength: 20,
-        tickWidth: 2,
-        minorTickInterval: null,
-        labels: {
-            distance: 20,
-            style: {
-                fontSize: '14px'
-            }
-        },
-        lineWidth: 0,
-        plotBands: [{
-            from: 0,
-            to: 40,
-            color: '#55BF3B', // green
-            thickness: 20,
-            borderRadius: '50%'
-        }, {
-            from: 60,
-            to: 100,
-            color: '#DF5353', // red
-            thickness: 20,
-            borderRadius: '50%'
-        }, {
-            from: 40,
-            to: 60,
-            color: '#DDDF0D', // yellow
-            thickness: 20
-        }]
-    },
-    series: [{
-        name: '위반율',
-        data: [<%= helixSummary ? (helixSummary.rulesComplianceRatio * 100).toFixed(2) : 0 %>], 
-        tooltip: {
-            valueSuffix: ' %'
-        },
-        dataLabels: {
-            format: '{y} %',
-            borderWidth: 0,
-            color: (
-                Highcharts.defaultOptions.title &&
-                Highcharts.defaultOptions.title.style &&
-                Highcharts.defaultOptions.title.style.color
-            ) || '#333333',
-            style: {
-                fontSize: '16px'
-            }
-        },
-        dial: {
-            radius: '80%',
-            backgroundColor: 'gray',
-            baseWidth: 12,
-            baseLength: '0%',
-            rearLength: '0%'
-        },
-        pivot: {
-            backgroundColor: 'gray',
-            radius: 6
-        }
-    }]
-});
 
     
-// codesonar
-const specificWarningsCounts = <%- codesonarSummary ? JSON.stringify(codesonarSummary.specificWarningsCounts) : '{}' %>;
-const reliabilityCounts = <%- codesonarSummary ? JSON.stringify(codesonarSummary.reliabilityCounts) : '{}' %>;
-
-Highcharts.chart('chart-codesonar', {
-    chart: {
-        type: 'packedbubble',
-        height: '100%'
-    },
-    title: {
-        text: '경고별 규칙 위반 클래스 현황',
-    },
-    tooltip: {
-        useHTML: true,
-        pointFormat: '<b>{point.name}</b>: {point.value}'
-    },
-    plotOptions: {
-        packedbubble: {
-            minSize: '20%',
-            maxSize: '120%',
-            zMin: 0,
-            zMax: 1000,
-            layoutAlgorithm: {
-                gravitationalConstant: 0.25,
-                splitSeries: true,
-                seriesInteraction: false,
-                dragBetweenSeries: true,
-                parentNodeLimit: true,
-                bubblePadding: 10  
-            },
-            dataLabels: {
-                enabled: true,
-                format: '{point.name}',
-                filter: {
-                    property: 'y',
-                    operator: '>',
-                },
-                style: {
-                    color: 'black',
-                    textOutline: 'none',
-                    fontWeight: 'normal'
-                }
-            }
-        }
-    },
-    series: [{
-        name: '보안 규칙 위반 클래스',
-        data: Object.keys(specificWarningsCounts).map(key => ({
-            name: key,
-            value: specificWarningsCounts[key]
-        }))
-    }, {
-        name: '중복 클래스',
-        data: Object.keys(reliabilityCounts).map(key => ({
-            name: key,
-            value: reliabilityCounts[key]
-        }))
-    }]
-});
-
-// vectorcast
-function renderIcons() {
-    this.series.forEach(series => {
-        if (!series.icon) {
-            series.icon = this.renderer
-                .text(
-                    `<i class="fa fa-${series.options.custom.icon}"></i>`,  // Correctly using template literals
-                    0,
-                    0,
-                    true
-                )
-                .attr({
-                    zIndex: 10
-                })
-                .css({
-                    color: series.options.custom.iconColor,
-                    fontSize: '1.5em'
-                })
-                .add(this.series[2].group);
-        }
-        series.icon.attr({
-            x: this.chartWidth / 2 - 15,
-            y: this.plotHeight / 2 -
-                series.points[0].shapeArgs.innerR -
-                (
-                    series.points[0].shapeArgs.r -
-                    series.points[0].shapeArgs.innerR
-                ) / 2 +
-                8
-        });
-    });
-}
-
-function renderLegend() {
-    const chart = this;
-    if (chart.customLegend) {
-        chart.customLegend.destroy(); 
-    }
-
-    const legendGroup = chart.renderer.g('custom-legend')
-        .attr({
-            zIndex: 7
-        })
-        .add();
-
-    const legendItems = [
-        { name: '구문 커버리지', color: Highcharts.getOptions().colors[0] },
-        { name: '브랜치 커버리지', color: Highcharts.getOptions().colors[1] },
-        { name: '페어 커버리지', color: Highcharts.getOptions().colors[2] }
-    ];
-
-    legendItems.forEach((item, i) => {
-        chart.renderer.text(
-            `<span style="color:${item.color}; font-weight:bold;">●</span> ${item.name}`,
-            chart.chartWidth / 2,  
-            chart.chartHeight / 2 + 10 + (i * 20)  
-        )
-        .css({
-            fontSize: '14px',
-            textAlign: 'left',
-            color: item.color  
-        })
-        .attr({
-            align: 'center'
-        })
-        .add(legendGroup);
-    });
-
-    chart.customLegend = legendGroup;
-}
-
-const trackColors = Highcharts.getOptions().colors.map(color =>
-new Highcharts.Color(color).setOpacity(0.3).get()
-);
-
-Highcharts.chart('chart-vectorcast', {
-
-    chart: {
-        type: 'solidgauge',
-        height: '100%',
-        events: {
-            render: function () {
-                renderIcons.call(this);
-                renderLegend.call(this);
-            }
-        }
-    },
-
-title: {
-    text: 'VectorCAST 커버리지 현황',
-},
-
-pane: {
-    startAngle: 0,
-    endAngle: 360,
-    background: [{
-        outerRadius: '100%',
-        innerRadius: '80%',
-        backgroundColor: trackColors[0],
-        borderWidth: 0
-    }, {
-        outerRadius: '79%',
-        innerRadius: '58%',
-        backgroundColor: trackColors[1],
-        borderWidth: 0
-    }, {
-        outerRadius: '57%',
-        innerRadius: '38%',
-        backgroundColor: trackColors[2],
-        borderWidth: 0
-    }]
-},
-
-yAxis: {
-    min: 0,
-    max: 100,
-    lineWidth: 0,
-    tickPositions: []
-},
-
-plotOptions: {
-    solidgauge: {
-        dataLabels: {
-            enabled: false
-        },
-        linecap: 'round',
-        stickyTracking: false,
-        rounded: true
-    }
-},
-
-series: [{
-    name: '구문 커버리지',
-    data: [{
-        color: Highcharts.getOptions().colors[0],
-        radius: '100%',
-        innerRadius: '80%',
-        y: 21
-    }],
-    custom: {
-        icon: 'filter',
-        iconColor: '#303030'
-    }
-}, {
-    name: '브랜치 커버리지',
-    data: [{
-        color: Highcharts.getOptions().colors[1],
-        radius: '79%',
-        innerRadius: '58%',
-        y: 18
-    }],
-    custom: {
-        icon: 'comments-o',
-        iconColor: '#ffffff'
-    }
-}, {
-    name: '페어 커버리지',
-    data: [{
-        color: Highcharts.getOptions().colors[2],
-        radius: '57%',
-        innerRadius: '38%',
-        y: 6
-    }],
-    custom: {
-        icon: 'commenting-o',
-        iconColor: 'red'
-    }
-}],
-});
-
-
-// git
-    Highcharts.chart('chart-sourcecode', {
-    chart: {
-        type: 'pie',
-        height: '80%',
-        custom: {},
-        events: {
-            render() {
-                const chart = this,
-                    series = chart.series[0];
-                let customLabel = chart.options.chart.custom.label;
-
-                if (!customLabel) {
-                    customLabel = chart.options.chart.custom.label =
-                        chart.renderer.label(
-                            '<strong><%= gitStats.totalLines %></strong><br/>' +
-                            'lines'
-                        )
-                            .css({
-                                color: '#000',
-                                textAnchor: 'middle'
-                            })
-                            .add();
-                }
-
-                const x = series.center[0] + chart.plotLeft,
-                    y = series.center[1] + chart.plotTop -
-                        (customLabel.attr('height') / 2);
-
-                customLabel.attr({
-                    x,
-                    y
-                });
-                customLabel.css({
-                    fontSize: `${series.center[2] / 12}px`
-                });
-            }
-        }
-    },
-
-    accessibility: {
-        point: {
-            valueSuffix: '%'
-        }
-    },
-    title: {
-        text: 'Languages'
-    },
-    tooltip: {
-        pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
-    },
-    legend: {
-        enabled: false
-    },
-    plotOptions: {
-        series: {
-            allowPointSelect: true,
-            cursor: 'pointer',
-            borderRadius: 8,
-            dataLabels: [{
-                enabled: true,
-                distance: 20,
-                format: '{point.name}'
-            }, {
-                enabled: true,
-                distance: -15,
-                format: '{point.percentage:.0f}%',
-                style: {
-                    fontSize: '0.9em'
-                }
-            }],
-            showInLegend: true
-        }
-    },
-
-    series: [{
-        name: 'Registrations',
-        colorByPoint: true,
-        innerSize: '75%',
-        data: [
-                <% for(const [language, lines] of Object.entries(gitStats.languages)) { %>
-                { name: '<%= language %>', y: <%= lines %> },
-                    <% } %>
-                ]
-            }]
-        });      
-    });    
-
-    </script>
-        
 </body>
 </html>

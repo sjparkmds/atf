@@ -16463,5 +16463,341 @@
     "activeWarnings": 321,
     "securityBreachRatio": 24.770642201834864,
     "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
+  },
+  {
+    "total": 327,
+    "specificWarningsCounts": {
+      "Buffer Overrun": 50,
+      "Cast Alters Value": 3,
+      "Coercion Alters Value": 9,
+      "Integer Overflow of Allocation Size": 3,
+      "Negative Shift Amount": 1,
+      "Uninitialized Variable": 15
+    },
+    "reliabilityCounts": {
+      "Empty for Statement": 107,
+      "Empty if Statement": 17,
+      "Empty while Statement": 12,
+      "Redundant Condition": 22,
+      "Unreachable Call": 6,
+      "Unreachable Computation": 3,
+      "Unreachable Conditional": 1,
+      "Unreachable Data Flow": 3,
+      "Unused Value": 10,
+      "Useless Assignment": 65
+    },
+    "lastRunTime": "2024년 8월 19일 (월) 오후 12:09:36",
+    "complexItems": 1,
+    "activeWarnings": 321,
+    "securityBreachRatio": 24.770642201834864,
+    "uniqueFilesCount": 60
   }
 ]

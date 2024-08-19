@@ -289,7 +289,7 @@ function extractVectorCASTSummary(html) {
 
 
 // Git
-const githubToken = process.env.GITHUB_TOKEN;
+/*const githubToken = process.env.GITHUB_TOKEN;
 const owner = 'sjparkmds'; 
 const repo = 'a';
 
@@ -368,7 +368,7 @@ function formatGitHubTimestamp(utcTimestamp) {
     return `${localDate} ${localClock}`;
 }
 // ---------------------------------------------------------------------------
-
+*/
 
 // Settings
 const settingsFilePath = path.join(__dirname, 'settings.json');
@@ -535,7 +535,7 @@ app.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const latestReport = findLatestReport();
     const latestHelixReportLink = latestReport ? path.basename(latestReport) : null;
-    let gitStats = await getGitHubRepoStats();
+  //  let gitStats = await getGitHubRepoStats();
 
     let helixSummary = null;
     let vectorCASTSummary = null;
@@ -591,7 +591,7 @@ app.get('/', async (req, res) => {
         codesonarSummary,
         latestHelixReportLink,
         vectorCASTReportPath,
-        gitStats,
+    //    gitStats,
         currentTime: now,
         completionTime: pipelineState.completionTime, 
         currentPath: req.path,
@@ -638,7 +638,7 @@ app.get('/vectorcast-summary', (req, res) => {
     });
 });
 
-app.get('/git-stats', async (req, res) => {
+/*app.get('/git-stats', async (req, res) => {
     try {
         let gitStats = await getGitHubRepoStats();
         res.json(gitStats);
@@ -647,7 +647,7 @@ app.get('/git-stats', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch GitHub stats' });
     }
 });
-
+*/
 app.get('/report', (req, res) => {
     const latestReport = findLatestReport();
     if (!latestReport) {
