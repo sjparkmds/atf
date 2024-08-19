@@ -1,0 +1,138 @@
+Addition Overflow of Allocation Size
+Addition Overflow of Size
+Buffer Overrun
+Buffer Underrun
+Cast Alters Value
+Coercion Alters Value
+Command Injection
+Conversion from Function Pointer
+Conversion to Function Pointer
+Double Free
+Encryption without Padding
+File System Race Condition
+Format String
+Format String Injection
+Format String Type Error
+Function Call Has No Effect
+Hardcoded Authentication
+Hardcoded Crypto Key
+Hardcoded Crypto Salt
+Hardcoded DNS Name
+Hardcoded Seed in PRNG
+Inappropriate Call Outside Loop
+Inline Assembly Code
+Integer Overflow of Allocation Size
+LDAP Injection
+Library Function Override
+Library Injection
+MAX_PATH Exceeded
+Memory Protection Removal
+Misaligned Object
+Multiplication Overflow of Allocation Size
+Multiplication Overflow of Size
+Negative Character Value
+Negative Shift Amount
+No Space For Null Terminator
+Null Security Descriptor
+Overlapping Memory Regions
+Padding Passed Across a Trust Boundary
+Plaintext Storage of Password
+Plaintext Transmission of Password
+Pool Mismatch
+Possible Anti-Debugging
+Predictable Seed in PRNG
+Return Pointer to Freed
+Return Pointer to Local
+Return from Computational Exception Signal Handler
+Return from noreturn
+Returned Pointer Not Treated as const
+SQL Injection
+Shift Amount Exceeds Bit Width
+Subtraction Underflow of Allocation Size
+Subtraction Underflow of Size
+Tainted Allocation Size
+Tainted Buffer Access
+Tainted Configuration Setting
+Tainted Environment Variable
+Tainted Filename
+Tainted Network Address
+Tainted Write
+Thread is not Joinable
+Truncation of Allocation Size
+Truncation of Size
+Type Mismatch
+Type Overrun
+Type Underrun
+Uninitialized Variable
+Unreasonable Size Argument
+Unterminated C String
+Untrusted Library Load
+Untrusted Network Host
+Untrusted Network Port
+Untrusted Process Creation
+Use After Close
+Use After Free
+Use of CreateFile
+Use of CreateProcess
+Use of CreateThread
+Use of FormatMessage
+Use of GetTempFileName
+Use of LoadLibrary
+Use of LoadModule
+Use of MoveFile
+Use of OemToAnsi
+Use of OemToChar
+Use of SHCreateProcessAsUserW
+Use of SO_REUSEADDR
+Use of ShellExecute
+Use of StrCatChainW
+Use of Weak Cryptographic Algorithm
+Use of WinExec
+Use of XML_ExternalEntityParserCreate
+Use of _exec
+Use of _spawn
+Use of catopen
+Use of chroot
+Use of crypt
+Use of cuserid
+Use of execlp
+Use of execvp
+Use of getlogin
+Use of getopt
+Use of getpass
+Use of getwd
+Use of memcmp
+Use of memset
+Use of mkstemp
+Use of mktemp
+Use of popen
+Use of rand
+Use of rand48 Function
+Use of random
+Use of realloc
+Use of realpath
+Use of recvmsg
+Use of setuid
+Use of signal
+Use of strcat
+Use of strchr
+Use of strcmp
+Use of strcoll
+Use of strcpy
+Use of strcspn
+Use of strlen
+Use of strpbrk
+Use of strrchr
+Use of strspn
+Use of strstr
+Use of strtok
+Use of strtrns
+Use of syslog
+Use of t_open
+Use of tmpfile
+Use of tmpnam
+Use of ttyname
+Use of vfork
+Varargs Function Cast
+Weak Cryptography
+chroot without chdir

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="preload" href="images/inactive_home.png" as="image">
+    <link rel="preload" href="images/active_home.png" as="image">
+    <link rel="preload" href="images/inactive_chart.png" as="image">
+    <link rel="preload" href="images/active_chart.png" as="image">
+    <link rel="preload" href="images/inactive_settings.png" as="image">
+    <link rel="preload" href="images/active_settings.png" as="image">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+  </head>
+
+ 
+<body>
+    <header class="header">
+        <div class="logo">
+            <a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a>
+        </div>
+        <div class="title-container">
+            <a href="/"><h1 class="title">NEO-ATF</h1></a>
+            <p>Automatic Testing Framework</p>
+        </div>
+    
+        <div class="menu-container">
+            <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
+                <div class="menu-icon-text">
+                    <img src="images/inactive_home.png" alt="Home Icon" class="icon inactive"/>
+                    <img src="images/active_home.png" alt="Home Icon" class="icon active"/>
+                </div>
+            </a>
+            <a href="/chart" class="menu-item <%= currentPath === '/chart' ? 'active' : '' %>">
+                <div class="menu-icon-text">
+                    <img src="images/inactive_chart.png" alt="Chart Icon" class="icon inactive"/>
+                    <img src="images/active_chart.png" alt="Chart Icon" class="icon active"/>
+                </div>
+            </a>
+            <a href="/settings" class="menu-item <%= currentPath === '/settings' ? 'active' : '' %>">
+                <div class="menu-icon-text">
+                    <img src="images/inactive_settings.png" alt="Settings Icon" class="icon inactive"/>
+                    <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
+                </div>
+            </a>
+        </div>            
+            
+    </header>
+
+
+    <div class="container settings-page">
+        <div class="card full-width">
+            <h2>테스트 도구 설정</h2>
+            <form action="/settings" method="post">
+                <div class="form-group">
+                    <label for="codesonar"><img src="/images/codesonar_logo.png" alt="CodeSonar Logo"></label>
+                    <label class="switch">
+                        <input type="checkbox" id="codesonar" name="codesonar" <%= settings.codesonar ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="helix"><img src="/images/helix_logo.jpg" alt="Helix Logo"></label>
+                    <label class="switch">
+                        <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="vectorcast"><img src="/images/vector_logo.png" alt="VectorCAST Logo"></label>
+                    <label class="switch">
+                        <input type="checkbox" id="vectorcast" name="vectorcast" <%= settings.vectorcast ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <button type="submit">설정 저장하기</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

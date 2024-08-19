@@ -1,0 +1,42 @@
+{
+  "name": "dashboard",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.prod.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.3",
+    "axios-cookiejar-support": "^5.0.2",
+    "bootstrap": "^5.3.3",
+    "bull": "^4.16.0",
+    "bull-board": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "child_process": "^1.0.2",
+    "dashboard": "file:",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "fs": "0.0.1-security",
+    "fs-extra": "^11.2.0",
+    "graceful-fs": "^4.2.11",
+    "passport": "^0.7.0",
+    "passport-http": "^0.3.0",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "puppeteer": "^22.15.0",
+    "simple-git": "^3.25.0",
+    "tough-cookie": "^4.1.4",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}
