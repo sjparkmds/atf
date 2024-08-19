@@ -50,6 +50,7 @@
     
 
 <script>
+
 document.addEventListener("DOMContentLoaded", function() {
     let currentPath = window.location.pathname;
     currentPath = currentPath === '' || currentPath === '/' ? '/' : currentPath.replace(/\/$/, '');
@@ -138,24 +139,21 @@ document.addEventListener("DOMContentLoaded", function() {
     if (helixSummary) {
         document.querySelector('.helix-summary h1').textContent = helixSummary.rulesWithViolations;
         const rateElement = document.querySelector('.helix-summary h3');
-    } else {
-    }
+    } else {}
 }
 
 function updateCodeSonarResults(codesonarSummary) {
     if (codesonarSummary) {
         document.querySelector('.codesonar-summary h1').textContent = codesonarSummary.activeWarnings;
         const rateElement = document.querySelector('.codesonar-summary h3');
-    } else {
-    }
+    } else {}
 }
 
 function updateVectorCASTResults(vectorCASTSummary) {
     if (vectorCASTSummary) {
         document.querySelector('.vectorcast-summary h1').textContent = vectorCASTSummary.passFail;
         const rateElement = document.querySelector('.vectorcast-summary h3');
-    } else {
-    }
+    } else {}
 }
 
     function fetchHelixSummary() {
@@ -180,41 +178,42 @@ function updateVectorCASTResults(vectorCASTSummary) {
     }
 
 </script>
-    
-    <div class="container">
 
-        <div class="card third-width <%= helixSummary ? '' : 'third-width-inactive' %>">
-            <% if (helixSummary) { %>
-                <div><h1 class="card-title">Helix QAC</h1></div>
-            <% } else { %>
-                <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
-        <div class="card third-width <%= codesonarSummary ? '' : 'third-width-inactive' %>">
-            <% if (codesonarSummary) { %>
-                <div><h1 class="card-title">CodeSonar</h1></div>
-            <% } else { %>
-                <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
-        <div class="card third-width <%= vectorCASTSummary ? '' : 'third-width-inactive' %>">
-            <% if (vectorCASTSummary) { %>
-                <div>
-                    <h1 class="card-title">VectorCAST</h1>
-                </div>
-                <div>
-                    <h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1>
-                </div>
-            <% } else { %>
-                <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
+<div class="container">
+    <div class="card quarter-width"><h1 class="card-title">Projects</h1></div>
+    <div class="card quarter-width"><h1 class="card-title">Helix QAC</h1></div>
+    <div class="card quarter-width"><h1 class="card-title">CodeSonar</h1></div>
+    <div class="card quarter-width"><h1 class="card-title">VectorCAST</h1></div>
+</div>
     
+<div class="container">
+    <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
+    <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (helixSummary) { %>
+        <% } else { %>
+            <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
+        <% } %>
     </div>
-
     
+    <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (codesonarSummary) { %>
+        <% } else { %>
+            <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
+        <% } %>
+    </div>
+    
+    <div class="card quarter-width <%= vectorCASTSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (vectorCASTSummary) { %>
+            <div>
+                <h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1>
+            </div>
+        <% } else { %>
+            <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
+        <% } %>
+    </div>
+    
+</div>
+
+
 </body>
 </html>

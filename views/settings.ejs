@@ -16,13 +16,8 @@
  
 <body>
     <header class="header">
-        <div class="logo">
-            <a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a>
-        </div>
-        <div class="title-container">
-            <a href="/"><h1 class="title">NEO-ATF</h1></a>
-            <p>Automatic Testing Framework</p>
-        </div>
+        <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
+        <div class="title-container"><h1 class="title">NEO-ATF</h1><p>Automatic Testing Framework</p></div>
     
         <div class="menu-container">
             <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -43,39 +38,75 @@
                     <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
                 </div>
             </a>
-        </div>            
-            
+        </div>                 
     </header>
 
-
-    <div class="container settings-page">
-        <div class="card full-width">
-            <h2>테스트 도구 설정</h2>
-            <form action="/settings" method="post">
-                <div class="form-group">
-                    <label for="codesonar"><img src="/images/codesonar_logo.png" alt="CodeSonar Logo"></label>
-                    <label class="switch">
-                        <input type="checkbox" id="codesonar" name="codesonar" <%= settings.codesonar ? 'checked' : '' %>>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="helix"><img src="/images/helix_logo.jpg" alt="Helix Logo"></label>
-                    <label class="switch">
-                        <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label for="vectorcast"><img src="/images/vector_logo.png" alt="VectorCAST Logo"></label>
-                    <label class="switch">
-                        <input type="checkbox" id="vectorcast" name="vectorcast" <%= settings.vectorcast ? 'checked' : '' %>>
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-                <button type="submit">설정 저장하기</button>
-            </form>
-        </div>
+<div class="container">
+    
+    <div class="card half-width settings-page" style="position: relative;">
+        <h1 style="display: inline-block; margin-right: 10px;">프로젝트 설정</h1>
+        <button class="git-button" onclick="addRepoField()">+ 프로젝트 추가</button>
+    
+        <form action="/settings" method="post">
+            <div class="form-group">
+                <label for="repo">GitHub Repository 1</label>
+                <input type="url" id="githubRepo1" name="githubRepo1" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
+            </div>
+    
+            <div id="additionalRepos"></div> <!-- Placeholder for dynamically added fields -->
+            <button type="submit" class="submit-button">설정 저장하기</button>
+        </form>
     </div>
+    
+
+    <script>
+        let repoCount = 1;
+    
+        function addRepoField() {
+            repoCount++;
+            const newField = document.createElement('div');
+            newField.className = 'form-group';
+            newField.innerHTML = `
+                <label for="repo">GitHub Repository ${repoCount}</label>
+                <input type="url" id="githubRepo${repoCount}" name="githubRepo${repoCount}" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
+                <label class="input">
+                    <input type="checkbox" id="checkbox${repoCount}" name="checkbox${repoCount}">
+                    <span class="slider round"></span>
+                </label>
+            `;
+            document.getElementById('additionalRepos').appendChild(newField);
+        }
+    </script>
+    
+
+    <div class="card half-width settings-page">
+        <h1>테스트 도구 설정</h1>
+        <form action="/settings" method="post">
+            <div class="form-group">
+                <label for="codesonar"><img src="/images/codesonar_logo.png" alt="CodeSonar Logo"></label>
+                <label class="switch">
+                    <input type="checkbox" id="codesonar" name="codesonar" <%= settings.codesonar ? 'checked' : '' %>>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="helix"><img src="/images/helix_logo.jpg" alt="Helix Logo"></label>
+                <label class="switch">
+                    <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="vectorcast"><img src="/images/vector_logo.png" alt="VectorCAST Logo"></label>
+                <label class="switch">
+                    <input type="checkbox" id="vectorcast" name="vectorcast" <%= settings.vectorcast ? 'checked' : '' %>>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <button type="submit">설정 저장하기</button>
+        </form>
+    </div>
+
+</div>
 </body>
 </html>

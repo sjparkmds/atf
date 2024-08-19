@@ -259,6 +259,41 @@ body {
     font-size: 1em;
 }
 
+.card.quarter-width {
+    margin-top: -10px;
+    position: relative;
+    flex: 1 1 calc(25% - 20px);
+    max-width: calc(25% - 20px);
+    text-align: center;
+    justify-content: space-between;
+}
+
+.card.quarter-width-inactive,
+.card.full-width-inactive {
+    background-color: #f0f0f0;
+    color: grey;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.card.quarter-width-inactive h2,
+.card.full-width-inactive h2 {
+    margin-top: 10px;
+    font-size: 1.5em;
+}
+
+.card.quarter-width-inactive p,
+.card.full-width-inactive p {
+    font-size: 1em;
+}
+
+
 .sourcecode {
     color: grey;
 }
@@ -383,21 +418,44 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+.git-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+    margin-top: 15px;
+}
 
-.container.settings-page .card h2 {
+.git-button:hover {
+    background-color: #218838;
+}
+
+/* Repo Input Field Styles */
+.repo-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.half-width.settings-page .card h2 {
     padding: 20px 50px 10px 50px; 
     margin: 0; 
-    font-size: 1.75em; 
+    font-size: 2.75em; 
     text-align: left; 
 }
 
-.container.settings-page {
-    max-width: 800px; 
+.half-width.settings-page {
     margin: 0 auto; 
     padding: 40px;
 }
 
-.container.settings-page button {
+.half-width.settings-page button {
     width: calc(100% - 60px);
     margin: 30px 40px 40px 35px; 
     padding: 15px;
@@ -410,18 +468,18 @@ input:checked + .slider:before {
     transition: background-color 0.3s ease;
 }
 
-.container.settings-page button:hover {
+.half-width.settings-page button:hover {
     background-color: #442f7f;
 }
 
-.container.settings-page .form-group {
+.half-width.settings-page .form-group {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 20px;
 }
 
-.container.settings-page .form-group label img {
+.half-width.settings-page .form-group label img {
     max-width: 120px; /* Set a more conservative maximum width */
     max-height: 40px; /* Adjusts the height proportionally */
     object-fit: contain;
@@ -429,7 +487,7 @@ input:checked + .slider:before {
     margin: 0 auto;
 }
 
-.container.settings-page .form-group label {
+.half-width.settings-page .form-group label {
     text-align: center; /* Centers the image within this fixed-width label */
 }
 
