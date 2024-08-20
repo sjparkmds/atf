@@ -1,8 +1,9 @@
-body {
-    color: #333;
-    font-family: Arial, sans-serif;
+html, body {
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    overflow-y: scroll; /* Ensures vertical scrollbar is always visible */
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 
@@ -36,11 +37,6 @@ body {
     white-space: nowrap; /* Prevents the title from wrapping to multiple lines */
 }
 
-.header .title-container a {
-    text-decoration: none;
-    color: inherit;
-}
-
 .header .title-container h1 {
     margin: 0;
     font-size: 3em;
@@ -54,50 +50,56 @@ body {
     font-size: 1em;
 }
 
+
 .menu-container {
     display: flex;
     align-items: center;
     gap: 20px;
-    z-index: 1; /* menu stays above the title if they overlap */
+    z-index: 1;
 }
 
 .menu-item {
     position: relative;
     text-decoration: none;
-}
-
-.menu-item .menu-icon-text {
+    height: 100px; /* Fixed height */
+    width: 150px;  /* Fixed width */
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .menu-item img.icon {
-    height: 90px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
     transition: opacity 0.3s ease;
 }
 
 .menu-item.active img.inactive {
-    display: none;
+    opacity: 0;
 }
 
 .menu-item.active img.active {
-    display: block;
+    opacity: 1;
 }
 
 .menu-item img.active {
-    display: none;
+    opacity: 0;
 }
 
 .menu-item:hover img.inactive {
-    display: none;
+    opacity: 0;
 }
 
 .menu-item:hover img.active {
-    display: block;
+    opacity: 1;
 }
-
-
 
 #current-time, .update-time {
     margin: 10px;
@@ -324,61 +326,110 @@ body {
     margin-top: 2px;
 }
 
-
-button {
-    padding: 10px 20px;
-    font-size: 20px;
-    background-color: #13a4cf;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 30px 0px 30px 0px;
+.title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 40px;
 }
 
-button:hover {
-    background-color: #442f7f;
-}
-
-button, .chart-button {
-    padding: 15px 50px;
+button:not(.remove-button):not(.git-button) {
+    padding: 15px 20px;
     font-size: 1.25em;
     background-color: #13a4cf;
     color: white;
     border: none;
-    border-radius: 30px;
+    border-radius: 35px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin: 30px 0px 30px 0px;
 }
 
-button:hover, .chart-button:hover {
+button:not(.remove-button):not(.git-button):hover {
     background-color: #442f7f;
 }
 
-
-/* Form Styles */
-.form-group {
+.tool-header {
     display: flex;
-    margin: 30px;
-    padding: 30px;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    justify-content: space-between; /* Spreads logo and switch to opposite ends */
+    width: 100%; /* Ensures full width */
 }
 
-label {
-    font-size: 1.2em;
-    color: #333;
+.tool-logo {
+    cursor: pointer;
+}
+
+.git-button,
+.remove-button {
+    background-color: #13a4cf;
+    color: white;
+    border: none;
+    border-radius: 35px;
+    padding: 10px 15px;
+    font-size: 1.25em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.git-button:hover,
+.remove-button:hover {
+    background-color: #442f7f;
+}
+
+.remove-button {
+    background-color: transparent;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.remove-button .trash-icon {
+    width: 30px;
+    height: px;
+}
+
+.remove-button:hover .trash-icon {
+    filter: brightness(0.8);
+}
+
+.submit-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    border-top: 1px solid #ccc;
+}
+
+.submit-button {
+    width: 200px;
+    padding: 15px;
+    font-size: 1.25em;
+    background-color: #13a4cf;
+    color: white;
+    border: none;
+    border-radius: 35px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.submit-button:hover {
+    background-color: #442f7f;
+}
+
+.container {
+    overflow-y: auto;
+    max-height: 80vh;
 }
 
 .switch {
     position: relative;
     display: inline-block;
     width: 50px;
-    height: 24px;  
-    margin-left: 20px;
+    height: 24px;
+    margin-left: auto;
 }
 
 .switch input {
@@ -396,16 +447,16 @@ label {
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-    border-radius: 24px; 
+    border-radius: 24px;
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 20px; 
-    width: 20px;  
-    left: 2px;   
-    bottom: 2px;  
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
@@ -418,58 +469,88 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
-.git-button {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.9em;
-    cursor: pointer;
-    margin-top: 15px;
+
+/* Form Styles */
+.form-group {
+    display: flex;
+    margin: 30px;
+    padding: 30px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-.git-button:hover {
-    background-color: #218838;
+label {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #333;
 }
 
-/* Repo Input Field Styles */
-.repo-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 1em;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+
+.settings-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows cards to wrap if there's not enough space */
+    justify-content: space-between; /* Space out the cards evenly */
+    gap: 20px; /* Add space between the cards */
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 100%; /* Ensure container doesn't exceed the viewport */
+    box-sizing: border-box; /* Include padding and border in element's width and height */
+}
+
+.card.half-width.settings-page {
+    flex: 1 1 calc(50% - 20px); /* Take up 50% of the container, minus the gap */
+    box-sizing: border-box; /* Ensure padding is included in width */
+    min-width: 200px; /* Prevent cards from getting too small */
+    max-width: 90%; /* Prevent cards from exceeding container's width */
+    margin-bottom: 20px; /* Space between rows if wrapped */
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card.left-pane {
+    overflow-y: auto; /* Allow vertical scrolling if content exceeds height */
+    max-height: 80vh; /* Ensure the card is scrollable if content is too tall */
+}
+
+.card.right-pane {
+    min-height: auto; /* Automatically adjust to content */
+    height: auto;
+    overflow: visible;
+}
+
+.card .title h1 {
+    margin: 0 0 20px 0;
+    font-size: 2.75em;
+}
+
+.card .form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card .form-group label img {
+    max-width: 250px; /* Set a more conservative maximum width */
+    max-height: 80px; /* Adjusts the height proportionally */
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
 }
 
 .half-width.settings-page .card h2 {
-    padding: 20px 50px 10px 50px; 
-    margin: 0; 
-    font-size: 2.75em; 
-    text-align: left; 
+    padding: 20px 50px 10px 50px;
+    margin: 0;
+    font-size: 2.75em;
+    text-align: left;
 }
 
 .half-width.settings-page {
-    margin: 0 auto; 
+    margin: 0 auto;
     padding: 40px;
-}
-
-.half-width.settings-page button {
-    width: calc(100% - 60px);
-    margin: 30px 40px 40px 35px; 
-    padding: 15px;
-    font-size: 1.25em;
-    background-color: #13a4cf;
-    color: white;
-    border: none;
-    border-radius: 35px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.half-width.settings-page button:hover {
-    background-color: #442f7f;
 }
 
 .half-width.settings-page .form-group {
@@ -480,21 +561,77 @@ input:checked + .slider:before {
 }
 
 .half-width.settings-page .form-group label img {
-    max-width: 120px; /* Set a more conservative maximum width */
-    max-height: 40px; /* Adjusts the height proportionally */
+    max-width: 250px; /* Set a more conservative maximum width */
+    max-height: 80px; /* Adjusts the height proportionally */
     object-fit: contain;
     display: block;
     margin: 0 auto;
 }
 
 .half-width.settings-page .form-group label {
-    text-align: center; /* Centers the image within this fixed-width label */
+    text-align: left;
+}
+
+
+.file-upload-wrapper {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.file-upload-label {
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+.custom-file-upload {
+    position: relative;
+    width: 75%; /* Match the .repo-input width */
+}
+
+
+.repo-input {
+    width: 65%;
+    padding: 20px;
+    font-size: 1em;
+    margin-top: 15px 0px;
+    border: 1px solid #ccc;
+    border-radius: 35px;
+}
+
+.file-upload-input {
+    width: 80%;
+    padding: 15px;
+    font-size: 1em;
+    margin-top: 15px 0px;
+    border: 1px solid #ccc;
+    border-radius: 35px;
+}
+
+
+.custom-file-upload-button {
+    display: inline-block;
+    width: 100%;
+    padding: 10px; /* Match the .repo-input padding */
+    font-size: 1em;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.file-upload-text {
+    margin-left: 10px;
+    font-size: 1em;
+    color: #555;
 }
 
 
 
 @media (max-width: 768px) {
-
     .half-width,
     .third-width {
         flex: 1 1 calc(50% - 40px);

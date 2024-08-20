@@ -12,12 +12,12 @@
     <link rel="preload" href="images/active_settings.png" as="image">
     <link rel="stylesheet" type="text/css" href="css/style.css" />
   </head>
-
  
 <body>
+
     <header class="header">
         <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
-        <div class="title-container"><h1 class="title">NEO-ATF</h1><p>Automatic Testing Framework</p></div>
+        <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
     
         <div class="menu-container">
             <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -40,23 +40,6 @@
             </a>
         </div>                 
     </header>
-
-<div class="container">
-    
-    <div class="card half-width settings-page" style="position: relative;">
-        <h1 style="display: inline-block; margin-right: 10px;">프로젝트 설정</h1>
-        <button class="git-button" onclick="addRepoField()">+ 프로젝트 추가</button>
-    
-        <form action="/settings" method="post">
-            <div class="form-group">
-                <label for="repo">GitHub Repository 1</label>
-                <input type="url" id="githubRepo1" name="githubRepo1" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
-            </div>
-    
-            <div id="additionalRepos"></div> <!-- Placeholder for dynamically added fields -->
-            <button type="submit" class="submit-button">설정 저장하기</button>
-        </form>
-    </div>
     
 
     <script>
@@ -67,46 +50,168 @@
             const newField = document.createElement('div');
             newField.className = 'form-group';
             newField.innerHTML = `
-                <label for="repo">GitHub Repository ${repoCount}</label>
-                <input type="url" id="githubRepo${repoCount}" name="githubRepo${repoCount}" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
-                <label class="input">
-                    <input type="checkbox" id="checkbox${repoCount}" name="checkbox${repoCount}">
-                    <span class="slider round"></span>
-                </label>
+                <label for="repo">프로젝트 ${repoCount}</label>
+                <input type="url" id="githubRepo${repoCount}" name="projects[]" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
+                <button type="button" class="remove-button" onclick="removeRepoField(this)">
+                <img src="/images/trash.svg" alt="Remove" class="trash-icon"></button>
             `;
             document.getElementById('additionalRepos').appendChild(newField);
         }
-    </script>
     
+        function removeRepoField(button) {
+            const fieldToRemove = button.parentElement;
+            fieldToRemove.remove();
+        }
+    
+        function toggleDetails(detailsId) {
+            var details = document.getElementById(detailsId);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    
+        function browseFile(inputId) {
+            var fileInput = document.getElementById(inputId);
+            alert("File browsing for " + inputId + " (You need to implement file browsing logic)");
+        }
 
-    <div class="card half-width settings-page">
-        <h1>테스트 도구 설정</h1>
-        <form action="/settings" method="post">
-            <div class="form-group">
-                <label for="codesonar"><img src="/images/codesonar_logo.png" alt="CodeSonar Logo"></label>
-                <label class="switch">
-                    <input type="checkbox" id="codesonar" name="codesonar" <%= settings.codesonar ? 'checked' : '' %>>
-                    <span class="slider round"></span>
-                </label>
+        function displayFileName(input) {
+        const fileName = input.files[0].name;
+        const label = document.querySelector(`label[for="${input.id}"]`);
+        label.textContent = `Uploaded: ${fileName}`;
+    }
+
+    </script>
+
+<form action="/settings" method="post" enctype="multipart/form-data">
+
+    <div class="settings-container">
+
+        <!-- Left Pane -->
+        <div class="card half-width settings-page left-pane">
+            <div class="title">
+                <h1>프로젝트 설정</h1>
+                <button type="button" class="git-button" onclick="addRepoField()">+ 추가</button>
             </div>
-            <div class="form-group">
-                <label for="helix"><img src="/images/helix_logo.jpg" alt="Helix Logo"></label>
-                <label class="switch">
-                    <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>>
-                    <span class="slider round"></span>
-                </label>
+
+            <% settings.projects.forEach(function(project, index) { %>
+                <div class="form-group">
+                    <label for="repo">프로젝트 <%= index + 1 %></label>
+                    <input type="url" id="githubRepo<%= index + 1 %>" name="projects[]" class="repo-input" value="<%= project %>" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
+                    <button type="button" class="remove-button" onclick="removeRepoField(this)">
+                        <img src="/images/trash.svg" alt="Remove" class="trash-icon">
+                    </button>
+                </div>
+            <% }); %>
+    
+            <div id="additionalRepos"></div> <!-- Placeholder for dynamically added fields -->
+        </div>
+
+        <!-- Right Pane -->
+        <div class="card half-width settings-page right-pane">
+            <div class="title">
+                <h1>테스트 도구 설정</h1>
             </div>
+
+            <!-- CodeSonar Settings -->
             <div class="form-group">
-                <label for="vectorcast"><img src="/images/vector_logo.png" alt="VectorCAST Logo"></label>
-                <label class="switch">
-                    <input type="checkbox" id="vectorcast" name="vectorcast" <%= settings.vectorcast ? 'checked' : '' %>>
-                    <span class="slider round"></span>
-                </label>
+                <div class="tool-header">
+                    <img src="/images/codesonar_logo.png" style="width: 10%;" alt="CodeSonar Logo" class="tool-logo" onclick="toggleDetails('codesonar-details')">
+                    <label class="switch">
+                        <input type="checkbox" id="codesonar" name="codesonar" <%= settings.codesonar ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
             </div>
-            <button type="submit">설정 저장하기</button>
-        </form>
+            <div id="codesonar-details" class="details" style="display: none;">
+                <div class="form-group">
+                    <label for="codesonar-path">프로젝트 저장 위치</label>
+                    <input type="text" id="codesonar-path" name="codesonar-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.codesonarPath %>">
+                    <button type="button" onclick="browseFile('codesonar-path')">검색</button>
+                </div>
+                <div class="form-group">
+                    <label for="codesonar-report-path">레포트 저장 위치</label>
+                    <input type="text" id="codesonar-report-path" name="codesonar-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.codesonarReportPath %>">
+                    <button type="button" onclick="browseFile('codesonar-report-path')">검색</button>
+                </div>
+                <div class="form-group file-upload-wrapper">
+                    <label for="codesonar-upload">시작 스크립트</label>
+                    <input type="file" id="helix-upload" name="codesonar-upload" class="file-upload-input" onchange="displayFileName(this)">
+                    <% if (settings.codesonarScriptPath) { %>
+                        <p>Uploaded script: <%= settings.codesonarScriptPath %></p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Helix Settings -->
+            <div class="form-group">
+                <div class="tool-header">
+                    <img src="/images/helix_logo.jpg" alt="Helix Logo" class="tool-logo" onclick="toggleDetails('helix-details')">
+                    <label class="switch">
+                        <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div id="helix-details" class="details" style="display: none;">
+                <div class="form-group">
+                    <label for="helix-path">프로젝트 저장 위치</label>
+                    <input type="text" id="helix-path" name="helix-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.helixPath %>">
+                    <button type="button" onclick="browseFile('helix-path')">검색</button>
+                </div>
+                <div class="form-group">
+                    <label for="helix-report-path">레포트 저장 위치</label>
+                    <input type="text" id="helix-report-path" name="helix-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.helixReportPath %>">
+                    <button type="button" onclick="browseFile('helix-report-path')">검색</button>
+                </div>
+                <div class="form-group file-upload-wrapper">
+                    <label for="helix-upload">시작 스크립트</label>
+                    <input type="file" id="helix-upload" name="helix-upload" class="file-upload-input" onchange="displayFileName(this)">
+                    <% if (settings.helixScriptPath) { %>
+                        <p>Uploaded script: <%= settings.helixScriptPath %></p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- VectorCAST Settings -->
+            <div class="form-group">
+                <div class="tool-header">
+                    <img src="/images/vector_logo.png" alt="VectorCAST Logo" class="tool-logo" onclick="toggleDetails('vectorcast-details')">
+                    <label class="switch">
+                        <input type="checkbox" id="vectorcast" name="vectorcast" <%= settings.vectorcast ? 'checked' : '' %>>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div id="vectorcast-details" class="details" style="display: none;">
+                <div class="form-group">
+                    <label for="vectorcast-path">프로젝트 저장 위치</label>
+                    <input type="text" id="vectorcast-path" name="vectorcast-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.vectorcastPath %>">
+                    <button type="button" onclick="browseFile('vectorcast-path')">검색</button>
+                </div>
+                <div class="form-group">
+                    <label for="vectorcast-report-path">레포트 저장 위치</label>
+                    <input type="text" id="vectorcast-report-path" name="vectorcast-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.vectorcastReportPath %>">
+                    <button type="button" onclick="browseFile('vectorcast-report-path')">검색</button>
+                </div>
+                <div class="form-group file-upload-wrapper">
+                    <label for="vectorcast-upload">시작 스크립트</label>
+                    <input type="file" id="vectorcast-upload" name="vectorcast-upload" class="file-upload-input" onchange="displayFileName(this)">
+                    <% if (settings.vectorcastScriptPath) { %>
+                        <p>Uploaded script: <%= settings.vectorcastScriptPath %></p>
+                    <% } %>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="submit-container">
+            <button type="submit" class="submit-button">설정 저장하기</button>
+        </div>
     </div>
+</form>
 
-</div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const session = require('express-session');
 const path = require('path');
 const fs = require('fs');
@@ -34,6 +35,9 @@ passport.use(new BasicStrategy(
     }
 ));
 
+
+
+const settingsFilePath = path.join(__dirname, 'settings.json');
 
 // Helix QAC
 const reportsDir = "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\helix\\prqa\\configs\\Initial\\reports";
@@ -75,15 +79,8 @@ function extractTimestamp(filename) {
 }
 
 function extractSummary(html) {
-    const violations = parseInt((html.match(/Total number of rule violations<\/td><td style="text-align:right;">(\d+)<\/td>/) || [])[1] || '0', 10);
-    const compliant = parseInt((html.match(/Rules Compliant \((\d+)\)/) || [])[1] || '0', 10);
-    const totalLinesOfCode = parseInt((html.match(/Lines of Code \(LOC\)<\/td><td style="text-align:right;">(\d+)<\/td>/) || [])[1] || '0', 10);
-    const parserErrors = parseInt((html.match(/Total number of parser errors<\/td><td style="text-align:right;">(\d+)<\/td>/) || [])[1] || '0', 10);
+
     const rulesWithViolations = parseInt((html.match(/Rules with Violations \((\d+)\)/) || [])[1] || '0', 10);
-    const rulesCompliant = compliant;
-    const totalRules = compliant + rulesWithViolations;
-    const rulesComplianceRatio = (rulesCompliant / totalRules) || 0;
-    const violationsRatio = (violations / totalLinesOfCode) || 0;
 
     const lastAnalysisDateTimeMatch = html.match(/Last analysis date<\/td><td[^>]*>(.*?)<\/td>/);
     let lastAnalysisDateTime = lastAnalysisDateTimeMatch ? lastAnalysisDateTimeMatch[1] : 'N/A';
@@ -98,61 +95,31 @@ function extractSummary(html) {
     }
 
     const result = { 
-        total: totalLinesOfCode, 
-        compliant: rulesCompliant, 
-        violations, 
-        rulesComplianceRatio, 
-        violationsRatio, 
-        parserErrors,
         rulesWithViolations,
         lastAnalysisDateTime
     };
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'helix.json'));
 
     return result;
-
 }
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        weekday: 'short',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-    });
+        year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'});
 }
 
 // Codesonar
 const codesonarOutputFile = "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar/codesonar_output.txt";
-const specificWarningsFile = path.join(__dirname, 'public', 'data', 'security_warnings.txt');
-const reliabilityFile = path.join(__dirname, 'public', 'data', 'reliability.txt');
 
-function parseCodeSonarOutput(filePath, specificWarningsPath, reliabilityPath) {
+function parseCodeSonarOutput(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
-    const specificWarnings = fs.readFileSync(specificWarningsPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
-    const reliability = fs.readFileSync(reliabilityPath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
     const lines = content.split('\n');
     let totalWarnings = 0;
-    let specificWarningsCounts = {};
-    let reliabilityCounts = {};
+
     let lastRunTime = '';
-    let complexItems = 0;
-    const complexityThreshold = 300; // 300ms
     let activeWarnings = 0;
-    const unusedValueWarningType = 'Unreachable Call';
     const filePaths = new Set();
-
-    specificWarnings.forEach(warning => {
-        specificWarningsCounts[warning] = 0;
-    });
-
-    reliability.forEach(warning => {
-        reliabilityCounts[warning] = 0;
-    });
 
     lines.forEach(line => {
         if (line.startsWith('  Reporting')) {
@@ -161,56 +128,19 @@ function parseCodeSonarOutput(filePath, specificWarningsPath, reliabilityPath) {
             if (filePathMatch) {
                 filePaths.add(filePathMatch[1]);
             }
-
-            specificWarnings.forEach(warning => {
-                if (line.includes(warning)) {
-                    specificWarningsCounts[warning]++;
-                }
-            });
-
-            reliability.forEach(warning => {
-                if (line.includes(warning)) {
-                    reliabilityCounts[warning]++;
-                }
-            });
-
-            if (line.includes(unusedValueWarningType)) {
-                activeWarnings++;
-            }
         }
         if (line.includes('Time Elapsed')) {
             lastRunTime = line.match(/\[(.*?)\]/)[1];
-        }
-        if (line.match(/\d+ ms/)) {
-            const time = parseInt(line.match(/(\d+) ms/)[1], 10);
-            if (time > complexityThreshold) {
-                complexItems++;
-            }
         }
     });
 
     lastRunTime = formatDate(lastRunTime);
     activeWarnings = totalWarnings - activeWarnings;
-    specificWarningsCounts = Object.fromEntries(
-        Object.entries(specificWarningsCounts).filter(([_, count]) => count > 0)
-    );
-    reliabilityCounts = Object.fromEntries(
-        Object.entries(reliabilityCounts).filter(([_, count]) => count > 0)
-    );
-
-    const securityBreaches = Object.values(specificWarningsCounts).reduce((acc, count) => acc + count, 0);
-    const securityBreachRatio = totalWarnings > 0 ? (securityBreaches / totalWarnings) * 100 : 0;
-    const uniqueFilesCount = filePaths.size;
 
     const result = {
         total: totalWarnings,
-        specificWarningsCounts,
-        reliabilityCounts,
         lastRunTime,
-        complexItems,
-        activeWarnings,
-        securityBreachRatio,
-        uniqueFilesCount
+        activeWarnings
     };
 
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'codesonar.json'));
@@ -220,15 +150,7 @@ function parseCodeSonarOutput(filePath, specificWarningsPath, reliabilityPath) {
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        weekday: 'short',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-    });
+    return date.toLocaleString('ko-KR', {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'});
 }
 
 // VectorCAST
@@ -266,169 +188,16 @@ function extractVectorCASTSummary(html) {
         : 'Unknown';
     const passFailMatch = html.match(/<td id="overall-results-testcases">(.*?)<\/td>/);
     const passFail = passFailMatch ? passFailMatch[1].split('PASS')[0].trim() : 'Unknown';
-    const statementCoverageMatch = html.match(/<td id="overall-results-statements">(.*?)<\/td>/);
-    const statementCoverage = statementCoverageMatch ? statementCoverageMatch[1] : 'Unknown';
-    const branchCoverageMatch = html.match(/<td id="overall-results-branches">(.*?)<\/td>/);
-    const branchCoverage = branchCoverageMatch ? branchCoverageMatch[1] : 'Unknown';
-    const pairsCoverageMatch = html.match(/<td id="overall-results-mcdc-pairs">(.*?)<\/td>/);
-    const pairsCoverage = pairsCoverageMatch ? pairsCoverageMatch[1] : 'Unknown';
 
     const result = {
         created: formattedCreated,
-        passFail,
-        statementCoverage,
-        branchCoverage,
-        pairsCoverage
+        passFail
     };
 
     // Save the result to a JSON file
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'vectorcast.json'));
 
     return result;
-}
-
-
-// Git
-/*const githubToken = process.env.GITHUB_TOKEN;
-const owner = 'sjparkmds'; 
-const repo = 'a';
-
-async function getTotalCommits(owner, repo) {
-    try {
-        const headers = {
-            'Authorization': `token ${process.env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache'
-        };
-
-        let page = 1;
-        let commits = [];
-        let moreCommits = true;
-
-        while (moreCommits) {
-            const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/commits`, {
-                headers,
-                params: { per_page: 100, page }
-            });
-
-            if (response.data.length > 0) {
-                commits = commits.concat(response.data);
-                page++;
-            } else {
-                moreCommits = false;
-            }
-        }
-
-        return commits.length;
-    } catch (error) {
-        console.error('Error fetching total commits:', error);
-        return 0;
-    }
-}
-
-async function getGitHubRepoStats() {
-    try {
-        const headers = {
-            'Authorization': `token ${githubToken}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache'
-        };
-
-        const commits = await getTotalCommits(owner, repo);
-
-        const repoResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, { headers });
-        const languagesResponse = await axios.get(`https://api.github.com/repos/${owner}/${repo}/languages`, { headers });
-
-        const latestCommit = repoResponse.data.pushed_at;
-        const latestCommitAuthor = repoResponse.data.owner.login;
-
-        const numberOfFiles = repoResponse.data.size;
-        const languages = languagesResponse.data;
-        const totalLines = Object.values(languages).reduce((acc, lines) => acc + lines, 0);
-
-        const result = { commits, latestCommitDate: formatGitHubTimestamp(latestCommit), latestCommitAuthor, numberOfFiles, languages, totalLines };
-        saveDataToFile(result, path.join(__dirname, 'public', 'data', 'git.json'));
-
-        return result;
-    } catch (error) {
-        console.error('Error fetching GitHub statistics:', error);
-        return { commits: 0, latestCommitDate: 'N/A', latestCommitAuthor: 'N/A', numberOfFiles: 'N/A', languages: {}, totalLines: 0 };
-    }
-}
-
-function formatGitHubTimestamp(utcTimestamp) {
-    let [date, time] = utcTimestamp.split('T');
-    time = time.replace('Z', '');
-
-    const utcDate = new Date(`${date}T${time}Z`);
-    const localTime = new Date(utcDate.getTime());
-    const localDate = localTime.toISOString().split('T')[0];
-    const localClock = localTime.toTimeString().split(' ')[0];
-
-    return `${localDate} ${localClock}`;
-}
-// ---------------------------------------------------------------------------
-*/
-
-// Settings
-const settingsFilePath = path.join(__dirname, 'settings.json');
-
-function loadSettings() {
-    if (fs.existsSync(settingsFilePath)) {
-        const data = fs.readFileSync(settingsFilePath, 'utf8');
-        const settings = JSON.parse(data);
-        console.log('Loaded settings from file:', settings);  // Add this line
-        return settings;
-    }
-    console.log('Settings file not found, using defaults');  // Add this line
-    return { codesonar: true, helix: true, vectorcast: true };
-}
-
-
-let settings = loadSettings();
-
-function saveSettings(settings) {
-    fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
-    console.log('Settings saved:', settings);
-}
-
-
-app.post('/settings', (req, res) => {
-    console.log('POST /settings called');
-    settings = {
-        codesonar: req.body.codesonar === 'on',
-        helix: req.body.helix === 'on',
-        vectorcast: req.body.vectorcast === 'on',
-    };
-    console.log('Settings:', settings); // Debugging line
-    saveSettings(settings);
-    res.redirect('/');
-});
-
-function saveDataToFile(newData, filePath) {
-    let existingData = [];
-
-    if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, 'utf8');
-        try {
-            existingData = JSON.parse(fileData);
-
-            if (!Array.isArray(existingData)) {
-                existingData = []; 
-            }
-        } catch (error) {
-            console.error("Error parsing existing JSON data:", error);
-            existingData = []; 
-        }
-    }
-
-    existingData.push(newData);
-
-    try {
-        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
-    } catch (error) {
-        console.error(`Error saving data to ${filePath}:`, error);
-    }
 }
 
 // app.js
@@ -438,9 +207,7 @@ const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipe
 app.post('/run-codesonar-pipeline', (req, res) => {
     try {
         res.status(200).send('CodeSonar pipeline triggered.');
-        runCodeSonarPipeline().catch(err => {
-            console.error('CodeSonar pipeline encountered an error:', err);
-        });
+        runCodeSonarPipeline().catch(err => {console.error('CodeSonar pipeline encountered an error:', err);});
     } catch (error) {
         console.error('Error triggering CodeSonar pipeline:', error);
         res.status(500).send('Failed to trigger CodeSonar pipeline.');
@@ -451,9 +218,7 @@ app.post('/run-codesonar-pipeline', (req, res) => {
 app.post('/run-helix-pipeline', (req, res) => {
     try {
         res.status(200).send('Helix QAC pipeline triggered.');
-        runHelixPipeline().catch(err => {
-            console.error('Helix QAC pipeline encountered an error:', err);
-        });
+        runHelixPipeline().catch(err => {console.error('Helix QAC pipeline encountered an error:', err);});
     } catch (error) {
         console.error('Error triggering Helix QAC pipeline:', error);
         res.status(500).send('Failed to trigger Helix QAC pipeline.');
@@ -464,9 +229,7 @@ app.post('/run-helix-pipeline', (req, res) => {
 app.post('/run-vectorcast-pipeline', (req, res) => {
     try {
         res.status(200).send('VectorCAST pipeline triggered.');
-        runVectorCastPipeline().catch(err => {
-            console.error('VectorCAST pipeline encountered an error:', err);
-        });
+        runVectorCastPipeline().catch(err => {console.error('VectorCAST pipeline encountered an error:', err);});
     } catch (error) {
         console.error('Error triggering VectorCAST pipeline:', error);
         res.status(500).send('Failed to trigger VectorCAST pipeline.');
@@ -519,36 +282,181 @@ app.get('/specific-pipeline-progress/:pipeline', async (req, res) => {
 app.get('/completion-time', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const formattedCompletionTime = pipelineState.completionTime
-        ? pipelineState.completionTime.toLocaleString('ko-KR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric'
-        })
+        ? pipelineState.completionTime.toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'})
         : null;
     res.json({ completionTime: formattedCompletionTime });
 });
+
+
+// Settings
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/'); // Directory where files will be saved
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname); // Keep the original file name
+    }
+});
+
+const upload = multer({ storage: storage });  // Initialize Multer here
+
+
+
+
+function loadSettings() {
+    console.log('Loading settings from:', settingsFilePath);
+    if (fs.existsSync(settingsFilePath)) {
+        const data = fs.readFileSync(settingsFilePath, 'utf8');
+        console.log('Raw settings data:', data);
+        try {
+            let settings = JSON.parse(data);
+            console.log('Parsed settings:', settings);
+            
+            settings.codesonar = settings.codesonar !== undefined ? settings.codesonar : true;
+            settings.helix = settings.helix !== undefined ? settings.helix : true;
+            settings.vectorcast = settings.vectorcast !== undefined ? settings.vectorcast : true;
+
+            return settings;
+        } catch (error) {
+            console.error('Error parsing settings JSON:', error);
+        }
+    }
+    console.log('Settings file not found, using defaults');
+    return {
+        codesonar: true,
+        helix: true,
+        vectorcast: true,
+        codesonarPath: '',
+        codesonarReportPath: '',
+        helixPath: '',
+        helixReportPath: '',
+        vectorcastPath: '',
+        vectorcastReportPath: '',
+        projects: []
+    };
+}
+let settings = loadSettings();
+
+app.post('/settings', upload.fields([
+    { name: 'vectorcast-upload', maxCount: 1 },
+    { name: 'helix-upload', maxCount: 1 },
+    { name: 'codesonar-upload', maxCount: 1 }
+]), (req, res) => {
+    console.log('POST /settings called');
+    console.log('Received body:', req.body);
+    console.log('Received files:', req.files);
+
+    // Handle the uploaded files
+    if (req.files['vectorcast-upload']) {
+        settings.vectorcastScriptPath = req.files['vectorcast-upload'][0].path;
+    }
+    if (req.files['helix-upload']) {
+        settings.helixScriptPath = req.files['helix-upload'][0].path;
+    }
+    if (req.files['codesonar-upload']) {
+        settings.codesonarScriptPath = req.files['codesonar-upload'][0].path;
+    }
+
+    // Update settings with other form data
+    settings = {
+        codesonar: !!req.body.codesonar,
+        helix: !!req.body.helix,
+        vectorcast: !!req.body.vectorcast,
+        codesonarPath: req.body['codesonar-path'] || settings.codesonarPath,
+        codesonarReportPath: req.body['codesonar-report-path'] || settings.codesonarReportPath,
+        helixPath: req.body['helix-path'] || settings.helixPath,
+        helixReportPath: req.body['helix-report-path'] || settings.helixReportPath,
+        vectorcastPath: req.body['vectorcast-path'] || settings.vectorcastPath,
+        vectorcastReportPath: req.body['vectorcast-report-path'] || settings.vectorcastReportPath,
+        projects: req.body.projects || settings.projects
+    };
+
+    console.log('Settings:', settings);
+    saveSettings(settings);
+    res.redirect('/settings');
+});
+
+// Function to save settings to file
+function saveSettings(settings) {
+    const settingsFilePath = path.join(__dirname, 'settings.json');
+    fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
+    console.log('Settings saved:', settings);
+}
+
+
+
+function saveDataToFile(newData, filePath) {
+    let existingData = [];
+
+    if (fs.existsSync(filePath)) {
+        const fileData = fs.readFileSync(filePath, 'utf8');
+        try {
+            existingData = JSON.parse(fileData);
+
+            if (!Array.isArray(existingData)) {
+                existingData = []; 
+            }
+        } catch (error) {
+            console.error("Error parsing existing JSON data:", error);
+            existingData = []; 
+        }
+    }
+
+    existingData.push(newData);
+
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+    } catch (error) {
+        console.error(`Error saving data to ${filePath}:`, error);
+    }
+}
+
+
+
+app.post('/settings', upload.single('vectorcast-upload'), (req, res) => {
+    console.log('POST /settings called');
+    console.log('Received body:', req.body);
+
+    // Handle the uploaded file
+    if (req.file) {
+        console.log('Uploaded file:', req.file);
+        settings.vectorcastScriptPath = req.file.path; // Save the file path to settings
+    }
+
+    // Update settings with other form data
+    settings = {
+        codesonar: !!req.body.codesonar,
+        helix: !!req.body.helix,
+        vectorcast: !!req.body.vectorcast,
+        codesonarPath: req.body['codesonar-path'] || settings.codesonarPath,
+        codesonarReportPath: req.body['codesonar-report-path'] || settings.codesonarReportPath,
+        helixPath: req.body['helix-path'] || settings.helixPath,
+        helixReportPath: req.body['helix-report-path'] || settings.helixReportPath,
+        vectorcastPath: req.body['vectorcast-path'] || settings.vectorcastPath,
+        vectorcastReportPath: req.body['vectorcast-report-path'] || settings.vectorcastReportPath,
+        projects: req.body.projects || settings.projects
+    };
+
+    console.log('Settings:', settings);
+    saveSettings(settings);
+    res.redirect('/settings');
+});
+
+
 
 app.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const latestReport = findLatestReport();
     const latestHelixReportLink = latestReport ? path.basename(latestReport) : null;
-  //  let gitStats = await getGitHubRepoStats();
 
     let helixSummary = null;
     let vectorCASTSummary = null;
     let codesonarSummary = null;
-    let previousHelixSummary = null;
-    let previousVectorCASTSummary = null;
-    let previousCodeSonarSummary = null;
 
     if (settings.helix && latestReport) {
         try {
             const data = fs.readFileSync(latestReport, 'utf8');
             helixSummary = extractSummary(data);
-            previousHelixSummary = loadPreviousSummary('helix.json');
         } catch (error) {
             console.error("Error parsing Helix QAC data:", error);
         }
@@ -558,7 +466,6 @@ app.get('/', async (req, res) => {
         try {
             const data = fs.readFileSync(vectorCASTReportPath, 'utf8');
             vectorCASTSummary = extractVectorCASTSummary(data);
-            previousVectorCASTSummary = loadPreviousSummary('vectorcast.json');
         } catch (error) {
             console.error("Error parsing VectorCAST data:", error);
         }
@@ -566,88 +473,54 @@ app.get('/', async (req, res) => {
 
     if (settings.codesonar && fs.existsSync(codesonarOutputFile)) {
         try {
-            codesonarSummary = parseCodeSonarOutput(codesonarOutputFile, specificWarningsFile, reliabilityFile);
-            previousCodeSonarSummary = loadPreviousSummary('codesonar.json');
+            codesonarSummary = parseCodeSonarOutput(codesonarOutputFile);
         } catch (error) {
             console.error("Error parsing CodeSonar data:", error);
         }
     }
 
-    const codesonarRate = calculateRate(codesonarSummary?.activeWarnings, previousCodeSonarSummary?.activeWarnings);
-    const vectorCASTRate = calculateRate(vectorCASTSummary?.passFail, previousVectorCASTSummary?.passFail);
-    const helixRate = calculateRate(helixSummary?.rulesWithViolations, previousHelixSummary?.rulesWithViolations);
+    const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
 
-    const now = new Date().toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-    });
+    const projects = settings.projects || [];
+
     res.render('dashboard', {
         helixSummary,
         vectorCASTSummary,
         codesonarSummary,
         latestHelixReportLink,
         vectorCASTReportPath,
-    //    gitStats,
         currentTime: now,
         completionTime: pipelineState.completionTime, 
         currentPath: req.path,
-        codesonarRate,
-        vectorCASTRate,
-        helixRate
+        projects 
     });
 });
 
-function calculateRate(current, previous) {
-    if (previous === undefined || current === undefined || previous === 0) {
-        return 0;
-    }
-    return ((current - previous) / previous) * 100;
-}
+app.get('/settings', (req, res) => {
+    const settingsFilePath = path.join(__dirname, 'settings.json');
+    let settings = loadSettings();
+    
+    res.render('settings', {
+        settings: settings,
+        projects: settings.projects || [],
+        currentPath: req.path
+    });
+});
 
-function loadPreviousSummary(filename) {
-    const filePath = path.join(__dirname, 'data', filename);
-    if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(fileData);
-    }
-    return null;
-}
+
 
 app.get('/helix-summary', (req, res) => {
-    res.json({ 
-        helixSummary: pipelineState.helixSummary, 
-        helixRate: pipelineState.helixRate 
-    });
+    res.json({ helixSummary: pipelineState.helixSummary });
 });
 
 app.get('/codesonar-summary', (req, res) => {
-    res.json({ 
-        codesonarSummary: pipelineState.codesonarSummary, 
-        codesonarRate: pipelineState.codesonarRate 
-    });
+    res.json({ codesonarSummary: pipelineState.codesonarSummary });
 });
 
 app.get('/vectorcast-summary', (req, res) => {
-    res.json({ 
-        vectorCASTSummary: pipelineState.vectorCASTSummary, 
-        vectorCASTRate: pipelineState.vectorCASTRate 
-    });
+    res.json({ vectorCASTSummary: pipelineState.vectorCASTSummary });
 });
 
-/*app.get('/git-stats', async (req, res) => {
-    try {
-        let gitStats = await getGitHubRepoStats();
-        res.json(gitStats);
-    } catch (error) {
-        console.error('Error fetching GitHub stats:', error);
-        res.status(500).json({ error: 'Failed to fetch GitHub stats' });
-    }
-});
-*/
 app.get('/report', (req, res) => {
     const latestReport = findLatestReport();
     if (!latestReport) {
@@ -670,16 +543,10 @@ app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, 
 });
 
 
-// menus
+
 app.get('/chart', (req, res) => {
     res.render('chart', { currentPath: req.path });
 });
-
-app.get('/settings', (req, res) => {
-    res.render('settings', { currentPath: req.path, settings: settings });
-});
-
-
 
 // server
 app.listen(PORT, () => {

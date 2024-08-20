@@ -18,7 +18,7 @@
 
 <header class="header">
     <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
-    <div class="title-container"><h1 class="title">NEO-ATF</h1><p>Automatic Testing Framework</p></div>
+    <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
 
     <div class="menu-container">
         <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -134,12 +134,16 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchCodeSonarSummary();
     fetchVectorCASTSummary();
     }
+    </script>
 
-    function updateHelixResults(helixSummary) {
-    if (helixSummary) {
-        document.querySelector('.helix-summary h1').textContent = helixSummary.rulesWithViolations;
-        const rateElement = document.querySelector('.helix-summary h3');
-    } else {}
+
+<script>
+
+function updateHelixResults(helixSummary) {
+if (helixSummary) {
+    document.querySelector('.helix-summary h1').textContent = helixSummary.rulesWithViolations;
+    const rateElement = document.querySelector('.helix-summary h3');
+} else {}
 }
 
 function updateCodeSonarResults(codesonarSummary) {
@@ -156,28 +160,33 @@ function updateVectorCASTResults(vectorCASTSummary) {
     } else {}
 }
 
-    function fetchHelixSummary() {
-        fetch('/helix-summary')
-            .then(response => response.json())
-            .then(data => {updateHelixResults(data.helixSummary, data.helixRate);})
-            .catch(error => {console.error('Error fetching Helix summary:', error.message);});
-    }
+let projectCount = 1;
 
-    function fetchCodeSonarSummary() {
-        fetch('/codesonar-summary')
-            .then(response => response.json())
-            .then(data => {updateCodeSonarResults(data.codesonarSummary, data.codesonarRate);})
-            .catch(error => {console.error('Error fetching CodeSonar summary:', error.message);});
-    }
-
-    function fetchVectorCASTSummary() {
-        fetch('/vectorcast-summary')
-            .then(response => response.json())
-            .then(data => {updateVectorCASTResults(data.vectorCASTSummary, data.vectorCASTRate);})
-            .catch(error => {console.error('Error fetching VectorCAST summary:', error.message);});
-    }
+function addProjectField(projectName) {
+    const newField = document.createElement('div');
+    newField.className = 'card-group';
+    newField.innerHTML = `
+        <div class="card quarter-width"><h1 class="card-title">${projectName}</h1><button>자세히보기</button></div>
+        <div class="card quarter-width quarter-width-inactive">
+            <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
+        </div>
+        <div class="card quarter-width quarter-width-inactive">
+            <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
+        </div>
+        <div class="card quarter-width quarter-width-inactive">
+            <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
+        </div>
+    `;
+    document.getElementById('projectsContainer').appendChild(newField);
+}
 
 </script>
+
+<script>
+    const existingProjects = <%- JSON.stringify(projects) %>;
+    existingProjects.forEach(projectName => addProjectField(projectName));
+</script>
+
 
 <div class="container">
     <div class="card quarter-width"><h1 class="card-title">Projects</h1></div>
@@ -185,34 +194,39 @@ function updateVectorCASTResults(vectorCASTSummary) {
     <div class="card quarter-width"><h1 class="card-title">CodeSonar</h1></div>
     <div class="card quarter-width"><h1 class="card-title">VectorCAST</h1></div>
 </div>
-    
-<div class="container">
-    <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
-    <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
-        <% if (helixSummary) { %>
-        <% } else { %>
-            <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
-        <% } %>
+
+
+
+    <div class="container card-group">
+        <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
+        <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
+            <% if (helixSummary) { %>
+                <div><h1 class="card-big-number"><%= helixSummary.rulesWithViolations %></h1></div>
+            <% } else { %>
+                <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
+            <% } %>
+        </div>
+        
+        <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
+            <% if (codesonarSummary) { %>
+                <div><h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1></div>
+            <% } else { %>
+                <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
+            <% } %>
+        </div>
+        
+        <div class="card quarter-width <%= vectorCASTSummary ? '' : 'quarter-width-inactive' %>">
+            <% if (vectorCASTSummary) { %>
+                <div><h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1></div>
+            <% } else { %>
+                <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
+            <% } %>
+        </div>
+        
     </div>
-    
-    <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
-        <% if (codesonarSummary) { %>
-        <% } else { %>
-            <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
-        <% } %>
-    </div>
-    
-    <div class="card quarter-width <%= vectorCASTSummary ? '' : 'quarter-width-inactive' %>">
-        <% if (vectorCASTSummary) { %>
-            <div>
-                <h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1>
-            </div>
-        <% } else { %>
-            <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
-        <% } %>
-    </div>
-    
-</div>
+
+
+
 
 
 </body>
