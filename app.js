@@ -34,6 +34,11 @@ passport.use(new BasicStrategy(
 
 const settingsFilePath = path.join(__dirname, 'settings.json');
 
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleString('ko-KR', {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'});
+}
+
 // Helix QAC
 const reportsDir = "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\helix\\prqa\\configs\\Initial\\reports";
 
@@ -84,11 +89,6 @@ function extractSummary(html) {
     const result = { rulesWithViolations, lastAnalysisDateTime };
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'helix.json'));
     return result;
-}
-
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleString('ko-KR', {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'});
 }
 // -------------------------------------
 
@@ -157,6 +157,28 @@ function extractVectorCASTSummary(html) {
     return result;
 }
 // ----------------------------------------------
+
+// Function to save data to file
+function saveDataToFile(newData, filePath) {
+    let existingData = [];
+
+    if (fs.existsSync(filePath)) {
+        const fileData = fs.readFileSync(filePath, 'utf8');
+        try { existingData = JSON.parse(fileData);
+            if (!Array.isArray(existingData)) { existingData = []; }
+        } catch (error) {
+            console.error("Error parsing existing JSON data:", error);
+            existingData = []; 
+        }
+    }
+
+    existingData.push(newData);
+
+    try { fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+    } catch (error) {
+        console.error(`Error saving data to ${filePath}:`, error);
+    }
+}
 
 // app.js
 const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, checkAllPipelinesCompletion } = require('./pipelines');
@@ -323,28 +345,6 @@ function saveSettings(settings) {
     console.log('Settings saved:', settings);
 }
 
-// Function to save data to file
-function saveDataToFile(newData, filePath) {
-    let existingData = [];
-
-    if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, 'utf8');
-        try { existingData = JSON.parse(fileData);
-            if (!Array.isArray(existingData)) { existingData = []; }
-        } catch (error) {
-            console.error("Error parsing existing JSON data:", error);
-            existingData = []; 
-        }
-    }
-
-    existingData.push(newData);
-
-    try { fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
-    } catch (error) {
-        console.error(`Error saving data to ${filePath}:`, error);
-    }
-}
-
 
 app.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -382,7 +382,6 @@ app.get('/', async (req, res) => {
     }
 
     const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
-
     const projects = settings.projects || [];
 
     res.render('dashboard', {
@@ -423,9 +422,7 @@ app.get('/helix', (req, res) => {
 app.get('/vectorcast', (req, res) => {
     const vectorCASTReportPath = path.resolve('C:/Environments/test/abc.html');
     if (fs.existsSync(vectorCASTReportPath)) { res.sendFile(vectorCASTReportPath);
-    } else {
-        res.status(404).send('리포트 생성 중 오류가 발생하였습니다');
-    }
+    } else { res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
 });
 
 app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => { res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1'); });

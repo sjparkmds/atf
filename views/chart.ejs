@@ -11,39 +11,35 @@
     <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/series-label.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
     <script>Highcharts.setOptions({credits: {enabled: false}});</script>
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.jsdelivr.net/gh/lafeber/world-flags-sprite/stylesheets/flags32-both.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/lafeber/world-flags-sprite/stylesheets/flags32-both.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
 </head>
 
 <body>
-    <header class="header">
-        <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
-        <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
-    
-        <div class="menu-container">
-            <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
-                <div class="menu-icon-text">
-                    <img src="images/inactive_home.png" alt="Home Icon" class="icon inactive"/>
-                    <img src="images/active_home.png" alt="Home Icon" class="icon active"/>
-                </div>
-            </a>
-            <a href="/chart" class="menu-item <%= currentPath === '/chart' ? 'active' : '' %>">
-                <div class="menu-icon-text">
-                    <img src="images/inactive_chart.png" alt="Chart Icon" class="icon inactive"/>
-                    <img src="images/active_chart.png" alt="Chart Icon" class="icon active"/>
-                </div>
-            </a>
-            <a href="/settings" class="menu-item <%= currentPath === '/settings' ? 'active' : '' %>">
-                <div class="menu-icon-text">
-                    <img src="images/inactive_settings.png" alt="Settings Icon" class="icon inactive"/>
-                    <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
-                </div>
-            </a>
-        </div>                 
-    </header>
+
+<header class="header">
+    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
+    <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
+
+    <div class="menu-container">
+        <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
+            <div class="menu-icon-text">
+                <img src="images/inactive_home.png" alt="Home Icon" class="icon inactive"/>
+                <img src="images/active_home.png" alt="Home Icon" class="icon active"/>
+            </div></a>
+        <a href="/chart" class="menu-item <%= currentPath === '/chart' ? 'active' : '' %>">
+            <div class="menu-icon-text">
+                <img src="images/inactive_log.png" alt="Chart Icon" class="icon inactive"/>
+                <img src="images/active_log.png" alt="Chart Icon" class="icon active"/>
+            </div></a>
+        <a href="/settings" class="menu-item <%= currentPath === '/settings' ? 'active' : '' %>">
+            <div class="menu-icon-text">
+                <img src="images/inactive_settings.png" alt="Settings Icon" class="icon inactive"/>
+                <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
+            </div></a>
+    </div>                 
+</header>
     
     <div class="container">
         <div class="card full-width">
@@ -54,39 +50,6 @@
                     <button id="month-button" class="chart-button">월간 추이</button>
                 </div>
                 <div id="chart-all"></div>
-            </figure>
-        </div>
-    </div>
-    
-    
-
-    <div class="container">
-        <div class="card third-width">
-            <figure class="highcharts-figure">
-                <div id="chart-codesonar-security"></div>
-            </figure>
-        </div>
-        <div class="card third-width">
-            <figure class="highcharts-figure">
-                <div id="chart-helix-violation"></div>
-            </figure>
-        </div>
-        <div class="card third-width">
-            <figure class="highcharts-figure">
-                <div id="chart-regression"></div>
-            </figure>
-        </div>
-    </div>    
-
-    <div class="container">
-        <div class="card half-width">
-            <figure class="highcharts-figure">
-                <div id="chart-compliance"></div>
-            </figure>
-        </div>
-        <div class="card half-width">
-            <figure class="highcharts-figure">
-                <div id="chart-commiter-test"></div>
             </figure>
         </div>
     </div>
@@ -274,363 +237,8 @@ function setDateRange(range) {
 }
 //------------------chart-all end
 
-
-// helix-violation start
-function calculateAverages(ranges) {
-    return ranges.map(range => (range[0] + range[1]) / 2);
-}
-
-function initHelixViolationChart() {
-    const ranges = globalStaticData.HelixViolationChart.ranges;
-    const averages = calculateAverages(ranges);
-
-
-    Highcharts.chart('chart-helix-violation', {
-        title: {
-            text: 'Helix QAC 룰 위반율 추이',
-            align: 'left'
-        },
-        xAxis: {
-            type: 'datetime',
-            labels: {
-                formatter: function () {
-                    return Highcharts.dateFormat('%b %e', this.value);
-                },
-                overflow: 'justify'
-            },
-            accessibility: {
-                rangeDescription: 'Range: 2024 Aug'
-            }
-        },
-        yAxis: {
-            title: {
-                text: null
-            }
-        },
-        tooltip: {
-            crosshairs: true,
-            shared: true,
-            valueSuffix: '%'
-        },
-        plotOptions: {
-            series: {
-                pointStart: Date.UTC(2024, 4, 1),
-                pointIntervalUnit: 'day'
-            }
-        },
-        series: [{
-            name: '위반율',
-            data: averages,
-            zIndex: 1,
-            marker: {
-                fillColor: 'white',
-                lineWidth: 2,
-                lineColor: Highcharts.getOptions().colors[0]
-            }
-        }, {
-            name: '위반율',
-            data: ranges,
-            type: 'arearange',
-            lineWidth: 0,
-            linkedTo: ':previous',
-            color: Highcharts.getOptions().colors[0],
-            fillOpacity: 0.3,
-            zIndex: 0,
-            marker: {
-                enabled: false
-            }
-        }]
-    });
-};
-// -----------------------helix-violation end
-
-
-// codesonar-security start
-function initCodesonarSecurity() {
-    const data = globalStaticData['CodesonarSecurity'];
-
-Highcharts.chart('chart-codesonar-security', {
-    chart: {
-        zooming: {
-            type: 'xy'
-        }
-    },
-    title: {
-        text: 'Codesonar 경고별 추이',
-        align: 'left'
-    },
-    xAxis: [{
-                categories: data.categories,
-                crosshair: true
-            }],
-    yAxis: [{ // Primary yAxis
-        labels: {
-            format: '%',
-            style: {
-                color: Highcharts.getOptions().colors[1]
-            }
-        },
-        title: {
-            text: '보안 경고',
-            style: {
-                color: Highcharts.getOptions().colors[1]
-            }
-        }
-    }, { // Secondary yAxis
-        title: {
-            text: '신뢰성 경고',
-            style: {
-                color: Highcharts.getOptions().colors[0]
-            }
-        },
-        labels: {
-            format: '{value} %',
-            style: {
-                color: Highcharts.getOptions().colors[0]
-            }
-        },
-        opposite: true
-    }],
-    tooltip: {
-        shared: true
-    },
-    legend: {
-        align: 'left',
-        verticalAlign: 'top',
-        backgroundColor:
-            Highcharts.defaultOptions.legend.backgroundColor || // theme
-            'rgba(255,255,255,0.25)'
-    },
-    series: [{
-        name: '보안 경고',
-        type: 'column',
-        yAxis: 1,
-        data: data.securityWarnings,
-        tooltip: {
-            valueSuffix: ' %'
-        }
-
-    }, {
-        name: '신뢰성 경고',
-        type: 'spline',
-        data: data.reliabilityWarnings,
-        tooltip: {
-            valueSuffix: '%'
-        }
-    }]
-});
-};
-// ----------------codesonar-security end
-
-
-// vectorcast-coverage start
-Highcharts.chart('chart-commiter-test', {
-    chart: {
-        type: 'bar',
-    },
-    title: {
-        text: '개발자별 검증 결과 통계',
-        align: 'left'
-    },
-    xAxis: {
-        categories: ['sjpark', 'kmlee', 'shkim', 'kyjeong'],
-        title: {
-            text: null
-        },
-        gridLineWidth: 1,
-        lineWidth: 0
-    },
-    yAxis: {
-        min: 0,
-        title: {
-            text: '%',
-            align: 'high'
-        },
-        labels: {
-            overflow: 'justify'
-        },
-        gridLineWidth: 0
-    },
-    tooltip: {
-        valueSuffix: ' %'
-    },
-    plotOptions: {
-        bar: {
-            borderRadius: '50%',
-            dataLabels: {
-                enabled: true
-            },
-            groupPadding: 0.1
-        }
-    },
-    legend: {
-        layout: 'vertical',
-        align: 'right',
-        verticalAlign: 'top',
-        x: -40,
-        y: 80,
-        floating: true,
-        borderWidth: 1,
-        backgroundColor:
-            Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
-        shadow: true
-    },
-    credits: {
-        enabled: false
-    },
-    series: [{
-        name: 'Helix QAC 위반율',
-        data: [22, 44, 31, 12]
-    }, {
-        name: 'Codesonar 경고 탐지율',
-        data: [24, 41, 34, 22]
-    }, {
-        name: 'VectorCAST 커버리지 평균 탐지율',
-        data: [25, 42, 32, 35]
-    }]
-});
-// -------------vectorcast-coverage end
-
-
-// regression start
-function getTrendLine(data) {
-    const n = data.length;
-
-    let sumX = 0,
-        sumY = 0,
-        sumXY = 0,
-        sumX2 = 0;
-
-    // Calculate the sums needed for linear regression
-    for (let i = 0; i < n; i++) {
-        const [x, y] = data[i];
-        sumX += x;
-        sumY += y;
-        sumXY += x * y;
-        sumX2 += x ** 2;
-    }
-
-    // Calculate the slope of the trend line
-    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX ** 2);
-
-    // Calculate the intercept of the trend line
-    const intercept = (sumY - slope * sumX) / n;
-
-    const trendline = []; // Array to store the trend line data points
-
-    // Find the minimum and maximum x-values from the scatter plot data
-    const minX = Math.min(...data.map(([x]) => x));
-    const maxX = Math.max(...data.map(([x]) => x));
-
-    // Calculate the corresponding y-values for the trend line using the slope
-    // and intercept
-    trendline.push([minX, minX * slope + intercept]);
-    trendline.push([maxX, maxX * slope + intercept]);
-
-    return trendline;
-}
-
-function initVectorcastCoverage() {
-    const dataset = globalStaticData.VectorcastCoverage.dataset;
-
-Highcharts.chart('chart-regression', {
-    title: {
-        text: 'VectorCAST 회귀 분석',
-        align: 'left'
-    },
-    xAxis: {
-        min: -0.5,
-        max: 5.5
-    },
-    yAxis: {
-        min: 0
-    },
-    series: [{
-        type: 'line',
-        name: '동적테스트 결과',
-        data: getTrendLine(dataset),
-        marker: {
-            enabled: false
-        },
-        states: {
-            hover: {
-                lineWidth: 0
-            }
-        },
-        enableMouseTracking: false
-    }, {
-        type: 'scatter',
-        name: '커버리지',
-        data: dataset,
-        marker: {
-            radius: 4
-        }
-    }]
-});
-}
-
-// --------------regression end
-
-// compliance start
-function initPolarChart() {
-    const complianceStats = globalStaticData.PolarChart.compliance_statistics;
-    const testResults = globalStaticData.PolarChart.test_results;
-
-    Highcharts.chart('chart-compliance', {
-        chart: {
-            polar: true
-        },
-        title: {
-            text: '코드 업데이트와 검증 분석 결과 상관관계',
-            align: 'left'
-        },
-        pane: {
-            startAngle: 0,
-            endAngle: 360
-        },
-        xAxis: {
-            categories: complianceStats.compliance_name.concat(testResults.tools),
-            tickmarkPlacement: 'on',
-            lineWidth: 0
-        },
-        yAxis: {
-            min: 0,
-            endOnTick: false,
-            showLastLabel: true,
-            title: {
-                text: 'Count / Score'
-            }
-        },
-        plotOptions: {
-            series: {
-                pointStart: 0,
-                pointInterval: 1
-            },
-            column: {
-                pointPadding: 0,
-                groupPadding: 0
-            }
-        },
-        series: [{
-            type: 'area',
-            name: '정적 테스트 기반 규칙 준수 통계',
-            data: complianceStats.compliance,
-            pointPlacement: 'between'
-        }, {
-            type: 'line',
-            name: '동적 테스트 기반 통계',
-            data: testResults.results
-        }]
-    });
-}
-// --------------------------compliance end
-
 loadData(function () {
     initChartAll();
-    initHelixViolationChart();
-    initCodesonarSecurity();
-    initPolarChart();
-    initVectorcastCoverage();
 });
 
 </script>
