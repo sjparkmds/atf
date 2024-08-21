@@ -261,6 +261,15 @@ html, body {
     font-size: 1em;
 }
 
+.card.quarter-width p {
+    font-size: 1.5em;
+    margin-top: -30px;
+}
+
+.card.quarter-width button {
+    margin-top: 20px;
+}
+
 .card.quarter-width {
     margin-top: -10px;
     position: relative;
@@ -357,6 +366,7 @@ button:not(.remove-button):not(.git-button):hover {
 
 .tool-logo {
     cursor: pointer;
+    width: 15%;
 }
 
 .git-button,
@@ -395,11 +405,11 @@ button:not(.remove-button):not(.git-button):hover {
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding-bottom: 20px;
     position: sticky;
     bottom: 0;
     background-color: white;
-    border-top: 1px solid #ccc;
+    border-top: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .submit-button {
@@ -486,6 +496,21 @@ label {
     color: #333;
 }
 
+.repo-input {
+    width: 65%;
+    padding: 20px;
+    font-size: 1em;
+    margin-top: 15px 0px;
+    border: 1px solid #ccc;
+    border-radius: 35px;
+}
+
+.details {
+    display: flex;
+    flex-direction: column; /* Stack labels on top of inputs */
+    margin: 15px 0; /* Adjust spacing */
+    align-items: flex-start; /* Align items to the left */
+}
 
 .settings-container {
     display: flex;
@@ -523,7 +548,7 @@ label {
 
 .card .title h1 {
     margin: 0 0 20px 0;
-    font-size: 2.75em;
+    font-size: 2em;
 }
 
 .card .form-group {
@@ -534,8 +559,8 @@ label {
 }
 
 .card .form-group label img {
-    max-width: 250px; /* Set a more conservative maximum width */
-    max-height: 80px; /* Adjusts the height proportionally */
+    max-width: 350px; /* Set a more conservative maximum width */
+    max-height: 200px; /* Adjusts the height proportionally */
     object-fit: contain;
     display: block;
     margin: 0 auto;
@@ -568,11 +593,6 @@ label {
     margin: 0 auto;
 }
 
-.half-width.settings-page .form-group label {
-    text-align: left;
-}
-
-
 .file-upload-wrapper {
     display: flex;
     align-items: center;
@@ -587,16 +607,6 @@ label {
 .custom-file-upload {
     position: relative;
     width: 75%; /* Match the .repo-input width */
-}
-
-
-.repo-input {
-    width: 65%;
-    padding: 20px;
-    font-size: 1em;
-    margin-top: 15px 0px;
-    border: 1px solid #ccc;
-    border-radius: 35px;
 }
 
 .file-upload-input {

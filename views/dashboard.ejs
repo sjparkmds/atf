@@ -25,22 +25,20 @@
             <div class="menu-icon-text">
                 <img src="images/inactive_home.png" alt="Home Icon" class="icon inactive"/>
                 <img src="images/active_home.png" alt="Home Icon" class="icon active"/>
-            </div>
-        </a>
+            </div></a>
         <a href="/chart" class="menu-item <%= currentPath === '/chart' ? 'active' : '' %>">
             <div class="menu-icon-text">
                 <img src="images/inactive_chart.png" alt="Chart Icon" class="icon inactive"/>
                 <img src="images/active_chart.png" alt="Chart Icon" class="icon active"/>
-            </div>
-        </a>
+            </div></a>
         <a href="/settings" class="menu-item <%= currentPath === '/settings' ? 'active' : '' %>">
             <div class="menu-icon-text">
                 <img src="images/inactive_settings.png" alt="Settings Icon" class="icon inactive"/>
                 <img src="images/active_settings.png" alt="Settings Icon" class="icon active"/>
-            </div>
-        </a>
+            </div></a>
     </div>                 
 </header>
+
     
     <div class="container progress-bar-container">
         <div id="current-time"><%= currentTime %></div>
@@ -134,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchCodeSonarSummary();
     fetchVectorCASTSummary();
     }
-    </script>
+</script>
 
 
 <script>
@@ -160,6 +158,9 @@ function updateVectorCASTResults(vectorCASTSummary) {
     } else {}
 }
 
+
+const existingProjects = <%- JSON.stringify(projects) %>;
+    existingProjects.forEach(projectName => addProjectField(projectName));
 let projectCount = 1;
 
 function addProjectField(projectName) {
@@ -182,11 +183,6 @@ function addProjectField(projectName) {
 
 </script>
 
-<script>
-    const existingProjects = <%- JSON.stringify(projects) %>;
-    existingProjects.forEach(projectName => addProjectField(projectName));
-</script>
-
 
 <div class="container">
     <div class="card quarter-width"><h1 class="card-title">Projects</h1></div>
@@ -196,38 +192,35 @@ function addProjectField(projectName) {
 </div>
 
 
+<div class="container card-group">
 
-    <div class="container card-group">
-        <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
-        <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
-            <% if (helixSummary) { %>
-                <div><h1 class="card-big-number"><%= helixSummary.rulesWithViolations %></h1></div>
-            <% } else { %>
-                <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
-        <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
-            <% if (codesonarSummary) { %>
-                <div><h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1></div>
-            <% } else { %>
-                <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
-        <div class="card quarter-width <%= vectorCASTSummary ? '' : 'quarter-width-inactive' %>">
-            <% if (vectorCASTSummary) { %>
-                <div><h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1></div>
-            <% } else { %>
-                <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
-            <% } %>
-        </div>
-        
+    <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
+
+    <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (helixSummary) { %>
+            <div><h1 class="card-big-number"><%= helixSummary.rulesWithViolations %></h1></div><p>Violations</p>
+        <% } else { %>
+            <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
+        <% } %>
     </div>
-
-
-
-
+    
+    <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (codesonarSummary) { %>
+            <div><h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1></div><p>Active Warnings</p>
+        <% } else { %>
+            <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
+        <% } %>
+    </div>
+    
+    <div class="card quarter-width <%= vectorCASTSummary ? '' : 'quarter-width-inactive' %>">
+        <% if (vectorCASTSummary) { %>
+            <div><h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1></div><p>Pass / Test Cases</p>
+        <% } else { %>
+            <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
+        <% } %>
+    </div>
+    
+</div>
 
 </body>
 </html>

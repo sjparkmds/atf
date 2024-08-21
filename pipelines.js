@@ -67,17 +67,13 @@ async function runCodeSonarPipeline() {
         await cloneRepository(repoUrl, codesonarWorkspacePath, 'CodeSonar');
         pipelineState.progress.codeSonar = 10;
 
-        console.log("Cleanall CodeSonar...");
         await execPromise(`make -C ${codesonarWorkspacePath} cleanall`);
         pipelineState.progress.codeSonar = 30;
  
-        console.log("Building CodeSonar...");
         await execPromise(`make -C ${codesonarWorkspacePath}`);
-        console.log("CodeSonar build complete.");
         fs.writeFileSync(path.join(codesonarWorkspacePath, 'codesonar_pwfile'), 'dpaeldptm123!');
         pipelineState.progress.codeSonar = 50;
 
-        console.log("Running CodeSonar analysis...");
         await execPromise(`make -C ${codesonarWorkspacePath} cleanall`);
         const codesonarPrjPath = path.join(codesonarWorkspacePath, 'codesonar.prj');
         const codesonarPrjFilesPath = path.join(codesonarWorkspacePath, 'codesonar.prj_files');
@@ -106,7 +102,6 @@ async function runCodeSonarPipeline() {
         console.log("CodeSonar pipeline completed successfully.");
 
         pipelineState.completion.codeSonar = true;
-        console.log('codesonar completion flag set to true.');
         checkAllPipelinesCompletion();
     } catch (error) {
         console.error("CodeSonar pipeline failed:", error);
@@ -124,13 +119,10 @@ async function runHelixPipeline() {
         await cloneRepository(repoUrl, helixWorkspacePath, 'Helix QAC');
         pipelineState.progress.helix = 10;
 
-        console.log("Cleanall Helix...");
         await execPromise(`make -C ${helixWorkspacePath} cleanall`);
         pipelineState.progress.helix = 30;
 
-        console.log("Building Helix...");
         await execPromise(`make -C ${helixWorkspacePath}`);
-        console.log("Helix build complete.");
         pipelineState.progress.helix = 50;
 
         console.log(`Copying qac_start.bat from ${qacStartBatSource} to ${qacStartBatDest}`);
@@ -161,13 +153,10 @@ async function runVectorCastPipeline() {
         await cloneRepository(repoUrl, vectorcastWorkspacePath, 'VectorCAST');
         pipelineState.progress.vectorcast = 30;
 
-        console.log("Cleanall VectorCAST...");
         await execPromise(`make -C ${vectorcastWorkspacePath} cleanall`);
         pipelineState.progress.vectorcast = 10;
 
-        console.log("Building VectorCAST...");
         await execPromise(`make -C ${vectorcastWorkspacePath}`);
-        console.log("VectorCAST build complete.");
         pipelineState.progress.vectorcast = 30;
 
         await execPromise(`cd C:/Environments/test && C:/manage.exe -p mds --build-execute`);
@@ -187,14 +176,10 @@ async function runVectorCastPipeline() {
 
 async function getPipelineProgress(pipelineName) {
     switch (pipelineName) {
-        case 'codesonar':
-            return pipelineState.progress.codeSonar;
-        case 'helix':
-            return pipelineState.progress.helix;
-        case 'vectorcast':
-            return pipelineState.progress.vectorcast;
-        default:
-            return 0;
+        case 'codesonar': return pipelineState.progress.codeSonar;
+        case 'helix': return pipelineState.progress.helix;
+        case 'vectorcast': return pipelineState.progress.vectorcast;
+        default: return 0;
     }
 }
 
