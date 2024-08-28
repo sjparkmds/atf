@@ -167,9 +167,7 @@ function saveDataToFile(newData, filePath) {
         const fileData = fs.readFileSync(filePath, 'utf8');
         try {
             existingData = JSON.parse(fileData);
-            if (!Array.isArray(existingData)) {
-                existingData = [];
-            }
+            if (!Array.isArray(existingData)) { existingData = []; }
         } catch (error) {
             console.error("Error parsing existing JSON data:", error);
             existingData = [];
@@ -177,10 +175,7 @@ function saveDataToFile(newData, filePath) {
     }
 
     const latestEntry = existingData[existingData.length - 1];
-    if (latestEntry && JSON.stringify(latestEntry) === JSON.stringify(newData)) {
-        return;
-    }
-
+    if (latestEntry && JSON.stringify(latestEntry) === JSON.stringify(newData)) { return; }
     existingData.push(newData);
 
     try {
@@ -250,14 +245,10 @@ app.post('/end-pipelines', async (req, res) => {
     }
 });
 
-app.get('/pipeline-status', (req, res) => {
-    res.json({ status: pipelineState.status });
-});
+app.get('/pipeline-status', (req, res) => { res.json({ status: pipelineState.status }); });
 
 app.get('/pipeline-progress', (req, res) => {
-    const globalPipelineProgress = Math.round(
-        (pipelineState.progress.codeSonar + pipelineState.progress.helix + pipelineState.progress.vectorcast) / 3
-    );
+    const globalPipelineProgress = Math.round( (pipelineState.progress.codeSonar + pipelineState.progress.helix + pipelineState.progress.vectorcast) / 3 );
     res.json({ progress: globalPipelineProgress });
 });
 
@@ -319,21 +310,23 @@ function loadSettings() {
 
 let settings = loadSettings();
 
+
+const { createNewRepository, commitAndPushToGitHub } = require('./settings');
+
 app.post('/settings', upload.fields([
     { name: 'vectorcast-upload', maxCount: 1 },
     { name: 'helix-upload', maxCount: 1 },
     { name: 'codesonar-upload', maxCount: 1 }
-]), (req, res) => {
+]), async (req, res) => {
     console.log('POST /settings called');
     console.log('Received body:', req.body);
     console.log('Received files:', req.files);
 
-    // Update paths for uploaded scripts if provided
     if (req.files['vectorcast-upload']) { settings.vectorcastScriptPath = req.files['vectorcast-upload'][0].path; }
     if (req.files['helix-upload']) { settings.helixScriptPath = req.files['helix-upload'][0].path; }
     if (req.files['codesonar-upload']) { settings.codesonarScriptPath = req.files['codesonar-upload'][0].path; }
 
-    // Update settings
+    // Save settings
     settings = {
         codesonar: !!req.body.codesonar,
         helix: !!req.body.helix,
@@ -344,11 +337,25 @@ app.post('/settings', upload.fields([
         helixReportPath: req.body['helix-report-path'] || settings.helixReportPath,
         vectorcastPath: req.body['vectorcast-path'] || settings.vectorcastPath,
         vectorcastReportPath: req.body['vectorcast-report-path'] || settings.vectorcastReportPath,
-        projects: req.body.projects || settings.projects // Here projects represent the localRepoPaths
+        projects: req.body.projects || settings.projects,
+        repoName: req.body.repoName || settings.repoName,
     };
 
     console.log('Settings:', settings);
     saveSettings(settings);
+
+    if (settings.repoName) {
+        try {
+            const repo = await createNewRepository(settings.repoName);
+            const localRepoPath = settings.projects[0];
+            await commitAndPushToGitHub(localRepoPath, repo.clone_url);
+
+            console.log(`Repository setup complete: ${repo.html_url}`);
+        } catch (err) {
+            console.error(`Failed to create repository: ${err.message}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }
     res.redirect('/settings');
 });
 
@@ -356,6 +363,7 @@ app.post('/settings', upload.fields([
 // Function to save settings to file
 function saveSettings(settings) {
     const settingsFilePath = path.join(__dirname, 'settings.json');
+    console.log('Saving settings:', settings); // Add this line
     fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
     console.log('Settings saved:', settings);
 }
@@ -386,26 +394,20 @@ app.get('/', async (req, res) => {
         try {
             const data = fs.readFileSync(latestReport, 'utf8');
             helixSummary = extractSummary(data);
-        } catch (error) {
-            console.error("Error parsing Helix QAC data:", error);
-        }
+        } catch (error) { console.error("Error parsing Helix QAC data:", error); }
     }
 
     if (settings.vectorcast && fs.existsSync(vectorCASTReportPath)) {
         try {
             const data = fs.readFileSync(vectorCASTReportPath, 'utf8');
             vectorCASTSummary = extractVectorCASTSummary(data);
-        } catch (error) {
-            console.error("Error parsing VectorCAST data:", error);
-        }
+        } catch (error) { console.error("Error parsing VectorCAST data:", error); }
     }
 
     if (settings.codesonar && fs.existsSync(codesonarOutputFile)) {
         try {
             codesonarSummary = parseCodeSonarOutput(codesonarOutputFile);
-        } catch (error) {
-            console.error("Error parsing CodeSonar data:", error);
-        }
+        } catch (error) { console.error("Error parsing CodeSonar data:", error); }
     }
 
     const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
@@ -426,61 +428,11 @@ app.get('/', async (req, res) => {
 });
 
 
-const { createNewRepository, commitAndPushToGitHub } = require('./settings');
-
-app.get('/setup-repo', async (req, res) => {
-    try {
-        const repoName = req.query.name || "my-new-repo";
-        const description = req.query.description || "This is a new repository created by a script.";
-        
-        // Dynamically get the local repo path from settings
-        const localRepoPath = settings.projects[0]; // Example: using the first project path
-
-        if (!localRepoPath) {
-            return res.status(400).send('Local repository path is not set.');
-        }
-
-        // Step 1: Create a new repository on GitHub
-        const repo = await createNewRepository(repoName, description);
-
-        // Step 2: Commit and push local code to the new GitHub repository
-        await commitAndPushToGitHub(localRepoPath, repo.clone_url);
-
-        res.send(`Repository setup complete: ${repo.html_url}`);
-    } catch (err) {
-        res.status(500).send(`Error: ${err.message}`);
-    }
-});
-
-
 app.get('/settings', (req, res) => {
     const settingsFilePath = path.join(__dirname, 'settings.json');
     let settings = loadSettings();    
     res.render('settings', { settings: settings, projects: settings.projects || [], currentPath: req.path });
 });
-
-
-app.get('/helix-summary', (req, res) => { res.json({ helixSummary: pipelineState.helixSummary }); });
-
-app.get('/codesonar-summary', (req, res) => { res.json({ codesonarSummary: pipelineState.codesonarSummary }); });
-
-app.get('/vectorcast-summary', (req, res) => { res.json({ vectorCASTSummary: pipelineState.vectorCASTSummary }); });
-
-app.get('/helix', (req, res) => {
-    const latestReport = findLatestReport();
-    if (!latestReport) {
-        return res.status(404).send('리포트 생성 중 오류가 발생하였습니다');
-    }
-    res.sendFile(latestReport);
-});
-
-app.get('/vectorcast', (req, res) => {
-    const vectorCASTReportPath = path.resolve('C:/Environments/test/abc.html');
-    if (fs.existsSync(vectorCASTReportPath)) { res.sendFile(vectorCASTReportPath);
-    } else { res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
-});
-
-app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => { res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1'); });
 
 app.get('/chart', (req, res) => {
     const helixData = readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
@@ -502,9 +454,29 @@ app.get('/chart', (req, res) => {
         vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
     };
 });
-
     res.render('chart', { currentPath: req.path, logEntries });
 });
 
+
+
+app.get('/helix-summary', (req, res) => { res.json({ helixSummary: pipelineState.helixSummary }); });
+
+app.get('/codesonar-summary', (req, res) => { res.json({ codesonarSummary: pipelineState.codesonarSummary }); });
+
+app.get('/vectorcast-summary', (req, res) => { res.json({ vectorCASTSummary: pipelineState.vectorCASTSummary }); });
+
+app.get('/helix', (req, res) => {
+    const latestReport = findLatestReport();
+    if (!latestReport) { return res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
+    res.sendFile(latestReport);
+});
+
+app.get('/vectorcast', (req, res) => {
+    const vectorCASTReportPath = path.resolve('C:/Environments/test/abc.html');
+    if (fs.existsSync(vectorCASTReportPath)) { res.sendFile(vectorCASTReportPath);
+    } else { res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
+});
+
+app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => { res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1'); });
 
 app.listen(PORT, () => { console.log(`Server is running on http://localhost:${PORT}/`); });

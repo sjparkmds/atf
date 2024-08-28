@@ -40,26 +40,26 @@
     
 
 <script>
-    let repoCount = <%= settings.projects.length %>; // Initialize repoCount based on existing projects
+    let repoCount = <%= settings.projects.length %>; // Initialize based on existing projects
 
-function addRepoField() {
-    repoCount++;
-    const newField = document.createElement('div');
-    newField.className = 'form-group';
-    newField.innerHTML = `
-        <label for="localRepoPath${repoCount}">프로젝트 ${repoCount}</label>
-        <input type="text" id="localRepoPath${repoCount}" name="projects[]" class="repo-input" placeholder="Enter Local Repository Path" required>
-        <button type="button" class="remove-button" onclick="removeRepoField(this)">
-            <img src="/images/trash.svg" alt="Remove" class="trash-icon">
-        </button>
-    `;
-    document.getElementById('additionalRepos').appendChild(newField);
-}
+    function addRepoField() {
+        repoCount++;
+        const newField = document.createElement('div');
+        newField.className = 'form-group';
+        newField.innerHTML = `
+            <input type="text" id="repoName${repoCount}" name="repoNames[]" class="repo-name-input" placeholder="프로젝트명 입력" required>
+            <input type="text" id="localRepoPath${repoCount}" name="projects[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" required>
+            <button type="button" class="remove-button" onclick="removeRepoField(this)">
+                <img src="/images/trash.svg" alt="Remove" class="trash-icon">
+            </button>
+        `;
+        document.getElementById('additionalRepos').appendChild(newField);
+    }
 
-function removeRepoField(button) {
-    const fieldToRemove = button.parentElement;
-    fieldToRemove.remove();
-}
+    function removeRepoField(button) {
+        const fieldToRemove = button.parentElement;
+        fieldToRemove.remove();
+    }
 
     function toggleDetails(detailsId) {
         var details = document.getElementById(detailsId);
@@ -90,13 +90,14 @@ function removeRepoField(button) {
     <!-- Left Pane -->
     <div class="card half-width settings-page left-pane">
         <div class="title">
-            <h1>프로젝트 설정</h1><button type="button" class="git-button" onclick="addRepoField()">+ 추가</button>
+            <h1>프로젝트 설정</h1>
+            <button type="button" class="git-button" onclick="addRepoField()">+ 추가</button>
         </div>
     
         <% settings.projects.forEach(function(project, index) { %>
             <div class="form-group">
-                <label for="localRepoPath<%= index + 1 %>">프로젝트 <%= index + 1 %></label>
-                <input type="text" id="localRepoPath<%= index + 1 %>" name="projects[]" class="repo-input" value="<%= project %>" placeholder="Enter Local Repository Path" required>
+                <input type="text" id="repoName<%= index + 1 %>" name="repoNames[]" class="repo-name-input" placeholder="프로젝트명 입력" required>
+                <input type="text" id="localRepoPath<%= index + 1 %>" name="projects[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" value="<%= project %>" required>
                 <button type="button" class="remove-button" onclick="removeRepoField(this)">
                     <img src="/images/trash.svg" alt="Remove" class="trash-icon">
                 </button>

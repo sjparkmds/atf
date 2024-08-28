@@ -638,6 +638,16 @@ label {
     color: #333;
 }
 
+.repo-name-input {
+    width: 15%;
+    padding: 20px;
+    font-size: 1em;
+    margin-top: 15px 0px;
+    border: 1px solid #ccc;
+    border-radius: 35px;
+}
+
+
 .repo-input {
     width: 65%;
     padding: 20px;
