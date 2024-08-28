@@ -19,8 +19,8 @@
 <body>
 
 <header class="header">
-    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
-    <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
+    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo_horizontal.png" alt="Logo" /></a></div>
+    <div class="title-container"><h1>NEO-ITF</h1><p>Integrated Testing Framework</p></div>
 
     <div class="menu-container">
         <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -53,6 +53,33 @@
             </figure>
         </div>
     </div>
+
+<div class="container">
+    <div class="table full-width">
+        <table class="rwd-table">
+            <tbody>
+                <tr>
+                    <th>분석 완료 시각</th>
+                    <th>프로젝트</th>
+                    <th>Helix QAC</th>
+                    <th>CodeSonar</th>
+                    <th>VectorCAST</th>
+                </tr>
+                <% logEntries.forEach(entry => { %>
+                    <tr>
+                        <td><%= entry.timestamp %></td>
+                        <td><%= entry.project %></td>
+                        <td><%= entry.helixQAC %></td>
+                        <td><%= entry.codesonar %></td>
+                        <td><%= entry.vectorcast %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+       </div> 
+</div>    
+
+
 
 
 <script>
@@ -238,7 +265,7 @@ function setDateRange(range) {
 //------------------chart-all end
 
 loadData(function () {
-    initChartAll();
+initChartAll();
 });
 
 </script>

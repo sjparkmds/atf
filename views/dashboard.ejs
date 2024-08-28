@@ -17,8 +17,8 @@
 <body>
 
 <header class="header">
-    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo.png" alt="Logo" /></a></div>
-    <div class="title-container"><h1>NEO-ATF</h1><p>Automatic Testing Framework</p></div>
+    <div class="logo"><a href="https://www.mdsit.co.kr/index"><img src="images/mds_logo_horizontal.png" alt="Logo" /></a></div>
+    <div class="title-container"><h1>NEO-ITF</h1><p>Integrated Testing Framework</p></div>
 
     <div class="menu-container">
         <a href="/" class="menu-item <%= currentPath === '/' ? 'active' : '' %>">
@@ -48,7 +48,6 @@
     
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function() {
     let currentPath = window.location.pathname;
     currentPath = currentPath === '' || currentPath === '/' ? '/' : currentPath.replace(/\/$/, '');
@@ -63,75 +62,66 @@ document.addEventListener("DOMContentLoaded", function() {
     setInterval(updateTime, 1000);
 });
 
-    let hasCompleted = false;
+let hasCompleted = false;
 
-    function startPipeline() {
-    fetch('/start-pipeline', { method: 'POST' })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Failed to start the pipeline. Status:', response.status);
+function pollProgress() {
+const intervalId = setInterval(() => {
+    fetch('/pipeline-progress')
+        .then(response => response.json())
+        .then(data => {
+            if (data.progress === undefined) {
+                throw new Error('Progress data is missing');
             }
-        }).catch(error => {
-            console.error('Error starting the pipeline:', error.message);
+            updateProgressBar(data.progress);
+            
+            if (data.progress === 100) {
+                clearInterval(intervalId);  // Stop polling once progress reaches 100%
+                hasCompleted = true;        // Set flag to true to prevent repeated refresh
+                fetchCompletionTime();      // Fetch the final completion time
+            } else {
+                fetchCompletionTime(); // Continue to fetch completion time if progress < 100%
+            }
+        })
+        .catch(error => {
+            clearInterval(intervalId); 
+            console.error('Error fetching pipeline progress:', error.message);
         });
-    }
+}, 1000); // Poll every second
+}
 
-    function pollProgress() {
-    const intervalId = setInterval(() => {
-        fetch('/pipeline-progress')
-            .then(response => response.json())
-            .then(data => {
-                if (data.progress === undefined) {
-                    throw new Error('Progress data is missing');
-                }
-                updateProgressBar(data.progress);
-                
-                if (data.progress === 100) {
-                    clearInterval(intervalId);  // Stop polling once progress reaches 100%
-                    hasCompleted = true;        // Set flag to true to prevent repeated refresh
-                    fetchCompletionTime();      // Fetch the final completion time
-                    refreshPageData(); 
-                } else {
-                    fetchCompletionTime(); // Continue to fetch completion time if progress < 100%
-                }
-            }).catch(error => {
-                clearInterval(intervalId); 
-                console.error('Error fetching pipeline progress:', error.message);
-            });
-        }, 1000); // 1 second
-    }
-
-    function fetchCompletionTime() {
-        fetch('/completion-time')
-            .then(response => response.json())
-            .then(data => {
-                if (data.completionTime) {
-                    document.getElementById('completion-time').textContent = '완료 시각: ' + data.completionTime;
-                } else {
-                    console.error('Completion time is missing');
-                }
-            }).catch(error => {
-                console.error('Error fetching completion time:', error.message);
-            });
+function fetchCompletionTime() {
+fetch('/completion-time')
+    .then(response => response.json())
+    .then(data => {
+        if (data.completionTime) {
+            document.getElementById('completion-time').textContent = '완료 시각 : ' + data.completionTime;
+        } else {
+            document.getElementById('completion-time').textContent = ''; // Clear if no completion time
+            console.error('Completion time is missing');
         }
+    })
+    .catch(error => {
+        console.error('Error fetching completion time:', error.message);
+    });
+}
 
-    function updateProgressBar(percentage) {
-        const progressBar = document.getElementById('progress-bar');
-        progressBar.style.width = percentage + '%';
-        progressBar.textContent = percentage + '%';
-        }
+function updateProgressBar(percentage) {
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = percentage + '%';
+    progressBar.textContent = percentage + '%';
+}
 
 
-    function updateTime() {
-        const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
-        document.getElementById('current-time').textContent = '현재 시각 : ' + now;
-    }
+function updateTime() {
+    const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
+    document.getElementById('current-time').textContent = '현재 시각 : ' + now;
+}
 
-    function refreshPageData() {
-    fetchHelixSummary();
-    fetchCodeSonarSummary();
-    fetchVectorCASTSummary();
-    }
+function refreshPageData() {
+fetchHelixSummary();
+fetchCodeSonarSummary();
+fetchVectorCASTSummary();
+}
 </script>
 
 
@@ -200,7 +190,7 @@ function addProjectField(projectName) {
         <% if (helixSummary) { %>
             <div><h1 class="card-big-number"><%= helixSummary.rulesWithViolations %></h1></div><p>Violations</p>
         <% } else { %>
-            <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
+            <div class="inactive"><h2>Helix QAC</h2><br><p>Not Available</p></div>
         <% } %>
     </div>
     
@@ -208,7 +198,7 @@ function addProjectField(projectName) {
         <% if (codesonarSummary) { %>
             <div><h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1></div><p>Active Warnings</p>
         <% } else { %>
-            <div class="inactive"><h2>CodeSonar</h2><p>Not Available</p></div>
+            <div class="inactive"><h2>CodeSonar</h2><br><p>Not Available</p></div>
         <% } %>
     </div>
     
@@ -216,7 +206,7 @@ function addProjectField(projectName) {
         <% if (vectorCASTSummary) { %>
             <div><h1 class="card-big-number"><%= vectorCASTSummary.passFail %></h1></div><p>Pass / Test Cases</p>
         <% } else { %>
-            <div class="inactive"><h2>VectorCAST</h2><p>Not Available</p></div>
+            <div class="inactive"><h2>VectorCAST</h2><br><p>Not Available</p></div>
         <% } %>
     </div>
     

@@ -164,24 +164,34 @@ function saveDataToFile(newData, filePath) {
 
     if (fs.existsSync(filePath)) {
         const fileData = fs.readFileSync(filePath, 'utf8');
-        try { existingData = JSON.parse(fileData);
-            if (!Array.isArray(existingData)) { existingData = []; }
+        try {
+            existingData = JSON.parse(fileData);
+            if (!Array.isArray(existingData)) {
+                existingData = [];
+            }
         } catch (error) {
             console.error("Error parsing existing JSON data:", error);
-            existingData = []; 
+            existingData = [];
         }
+    }
+
+    const latestEntry = existingData[existingData.length - 1];
+    if (latestEntry && JSON.stringify(latestEntry) === JSON.stringify(newData)) {
+        return;
     }
 
     existingData.push(newData);
 
-    try { fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
     } catch (error) {
         console.error(`Error saving data to ${filePath}:`, error);
     }
 }
 
+
 // app.js
-const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, checkAllPipelinesCompletion } = require('./pipelines');
+const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, resetPipelineFlags, checkAllPipelinesCompletion } = require('./pipelines');
 
 // CodeSonar Pipeline
 app.post('/run-codesonar-pipeline', (req, res) => {
@@ -220,6 +230,7 @@ app.post('/run-vectorcast-pipeline', (req, res) => {
 // Progress
 app.post('/start-pipelines', async (req, res) => {
     try {
+        resetPipelineFlags();
         await Promise.all([ runCodeSonarPipeline(), runHelixPipeline(), runVectorCastPipeline() ]);
         res.json({ status: 'Pipelines started successfully' });
     } catch (error) {
@@ -346,6 +357,18 @@ function saveSettings(settings) {
 }
 
 
+function readJsonFile(filePath) {
+    if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        try {
+            return JSON.parse(data);
+        } catch (error) {
+            console.error(`Error parsing JSON data from ${filePath}:`, error);
+        }
+    }
+    return [];
+}
+
 app.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const latestReport = findLatestReport();
@@ -427,7 +450,29 @@ app.get('/vectorcast', (req, res) => {
 
 app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => { res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1'); });
 
-app.get('/chart', (req, res) => { res.render('chart', { currentPath: req.path }); });
+app.get('/chart', (req, res) => {
+    const helixData = readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
+    const codesonarData = readJsonFile(path.join(__dirname, 'public', 'data', 'codesonar.json'));
+    const vectorcastData = readJsonFile(path.join(__dirname, 'public', 'data', 'vectorcast.json'));
+
+    const logEntries = settings.projects.map((projectName, index) => {
+    const helixEntry = helixData[index] || {};
+    const codesonarEntry = codesonarData[index] || {};
+    const vectorcastEntry = vectorcastData[index] || {};
+
+    return {
+        timestamp: pipelineState.completionTime 
+            ? pipelineState.completionTime.toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'}) 
+            : 'N/A',
+        project: projectName,
+        helixQAC: helixEntry.rulesWithViolations !== undefined ? helixEntry.rulesWithViolations : 'N/A',
+        codesonar: codesonarEntry.activeWarnings !== undefined ? codesonarEntry.activeWarnings : 'N/A',
+        vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
+    };
+});
+
+    res.render('chart', { currentPath: req.path, logEntries });
+});
 
 // server
 app.listen(PORT, () => { console.log(`Server is running on http://localhost:${PORT}/`); });

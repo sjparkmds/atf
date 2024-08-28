@@ -58,6 +58,13 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
 // pipelines -------------------------------------------------------------------------------------
 const pipelineState = { status: 'Idle', progress: { codeSonar: 0, helix: 0, vectorcast: 0 }, completion: {codeSonar : false, helix: false, vectorcast: false}, completionTime: null };
 
+function resetPipelineFlags() {
+    pipelineState.completion.helix = false;
+    pipelineState.completion.vectorcast = false;
+    pipelineState.completion.codeSonar = false;
+}
+
+
 async function runCodeSonarPipeline() {
     try {
         console.log("Starting CodeSonar pipeline...");
@@ -188,11 +195,11 @@ function checkAllPipelinesCompletion() {
     console.log('Helix:', pipelineState.completion.helix);
     console.log('VectorCAST:', pipelineState.completion.vectorcast);
     console.log('CodeSonar:', pipelineState.completion.codeSonar);
-    
+
     const allCompleted = pipelineState.completion.helix && pipelineState.completion.vectorcast && pipelineState.completion.codeSonar;
-    if (allCompleted && !pipelineState.completionTime) { 
+    if (allCompleted) { 
         pipelineState.completionTime = new Date();
-        console.log('Completion time set:', pipelineState.completionTime);
+        console.log('Completion time updated:', pipelineState.completionTime);
     }
 }
 
@@ -203,5 +210,6 @@ module.exports = {
     runHelixPipeline,
     runVectorCastPipeline,
     getPipelineProgress,
+    resetPipelineFlags,
     checkAllPipelinesCompletion
 };
