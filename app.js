@@ -24,6 +24,7 @@ app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 passport.use(new BasicStrategy(
     function(username, password, done) {
         if (username === 'Administrator' && password === 'dpaeldptm123!') {
@@ -188,9 +189,9 @@ function saveDataToFile(newData, filePath) {
         console.error(`Error saving data to ${filePath}:`, error);
     }
 }
+// ------------------------------------------------------------------------------------
 
 
-// app.js
 const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, resetPipelineFlags, checkAllPipelinesCompletion } = require('./pipelines');
 
 // CodeSonar Pipeline
@@ -327,10 +328,12 @@ app.post('/settings', upload.fields([
     console.log('Received body:', req.body);
     console.log('Received files:', req.files);
 
+    // Update paths for uploaded scripts if provided
     if (req.files['vectorcast-upload']) { settings.vectorcastScriptPath = req.files['vectorcast-upload'][0].path; }
     if (req.files['helix-upload']) { settings.helixScriptPath = req.files['helix-upload'][0].path; }
     if (req.files['codesonar-upload']) { settings.codesonarScriptPath = req.files['codesonar-upload'][0].path; }
 
+    // Update settings
     settings = {
         codesonar: !!req.body.codesonar,
         helix: !!req.body.helix,
@@ -341,13 +344,14 @@ app.post('/settings', upload.fields([
         helixReportPath: req.body['helix-report-path'] || settings.helixReportPath,
         vectorcastPath: req.body['vectorcast-path'] || settings.vectorcastPath,
         vectorcastReportPath: req.body['vectorcast-report-path'] || settings.vectorcastReportPath,
-        projects: req.body.projects || settings.projects
+        projects: req.body.projects || settings.projects // Here projects represent the localRepoPaths
     };
 
     console.log('Settings:', settings);
     saveSettings(settings);
     res.redirect('/settings');
 });
+
 
 // Function to save settings to file
 function saveSettings(settings) {
@@ -405,6 +409,7 @@ app.get('/', async (req, res) => {
     }
 
     const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
+
     const projects = settings.projects || [];
 
     res.render('dashboard', {
@@ -420,12 +425,39 @@ app.get('/', async (req, res) => {
     });
 });
 
+
+const { createNewRepository, commitAndPushToGitHub } = require('./settings');
+
+app.get('/setup-repo', async (req, res) => {
+    try {
+        const repoName = req.query.name || "my-new-repo";
+        const description = req.query.description || "This is a new repository created by a script.";
+        
+        // Dynamically get the local repo path from settings
+        const localRepoPath = settings.projects[0]; // Example: using the first project path
+
+        if (!localRepoPath) {
+            return res.status(400).send('Local repository path is not set.');
+        }
+
+        // Step 1: Create a new repository on GitHub
+        const repo = await createNewRepository(repoName, description);
+
+        // Step 2: Commit and push local code to the new GitHub repository
+        await commitAndPushToGitHub(localRepoPath, repo.clone_url);
+
+        res.send(`Repository setup complete: ${repo.html_url}`);
+    } catch (err) {
+        res.status(500).send(`Error: ${err.message}`);
+    }
+});
+
+
 app.get('/settings', (req, res) => {
     const settingsFilePath = path.join(__dirname, 'settings.json');
     let settings = loadSettings();    
     res.render('settings', { settings: settings, projects: settings.projects || [], currentPath: req.path });
 });
-
 
 
 app.get('/helix-summary', (req, res) => { res.json({ helixSummary: pipelineState.helixSummary }); });
@@ -474,5 +506,5 @@ app.get('/chart', (req, res) => {
     res.render('chart', { currentPath: req.path, logEntries });
 });
 
-// server
+
 app.listen(PORT, () => { console.log(`Server is running on http://localhost:${PORT}/`); });

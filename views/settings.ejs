@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>ITF</title>
     <link rel="preload" href="images/inactive_home.png" as="image">
     <link rel="preload" href="images/active_home.png" as="image">
     <link rel="preload" href="images/inactive_log.png" as="image">
@@ -40,24 +40,26 @@
     
 
 <script>
-    let repoCount = 1;
+    let repoCount = <%= settings.projects.length %>; // Initialize repoCount based on existing projects
 
-    function addRepoField() {
-        repoCount++;
-        const newField = document.createElement('div');
-        newField.className = 'form-group';
-        newField.innerHTML = `
-            <label for="repo">프로젝트 ${repoCount}</label>
-            <input type="url" id="githubRepo${repoCount}" name="projects[]" class="repo-input" placeholder="Enter GitHub Repository URL" pattern="https://.*" required><button type="button" class="remove-button" onclick="removeRepoField(this)">
-            <img src="/images/trash.svg" alt="Remove" class="trash-icon"></button>
-        `;
-        document.getElementById('additionalRepos').appendChild(newField);
-    }
+function addRepoField() {
+    repoCount++;
+    const newField = document.createElement('div');
+    newField.className = 'form-group';
+    newField.innerHTML = `
+        <label for="localRepoPath${repoCount}">프로젝트 ${repoCount}</label>
+        <input type="text" id="localRepoPath${repoCount}" name="projects[]" class="repo-input" placeholder="Enter Local Repository Path" required>
+        <button type="button" class="remove-button" onclick="removeRepoField(this)">
+            <img src="/images/trash.svg" alt="Remove" class="trash-icon">
+        </button>
+    `;
+    document.getElementById('additionalRepos').appendChild(newField);
+}
 
-    function removeRepoField(button) {
-        const fieldToRemove = button.parentElement;
-        fieldToRemove.remove();
-    }
+function removeRepoField(button) {
+    const fieldToRemove = button.parentElement;
+    fieldToRemove.remove();
+}
 
     function toggleDetails(detailsId) {
         var details = document.getElementById(detailsId);
@@ -90,17 +92,20 @@
         <div class="title">
             <h1>프로젝트 설정</h1><button type="button" class="git-button" onclick="addRepoField()">+ 추가</button>
         </div>
-
+    
         <% settings.projects.forEach(function(project, index) { %>
             <div class="form-group">
-                <label for="repo">프로젝트 <%= index + 1 %></label>
-                <input type="url" id="githubRepo<%= index + 1 %>" name="projects[]" class="repo-input" value="<%= project %>" placeholder="Enter GitHub Repository URL" pattern="https://.*" required>
-                <button type="button" class="remove-button" onclick="removeRepoField(this)"><img src="/images/trash.svg" alt="Remove" class="trash-icon"></button>
+                <label for="localRepoPath<%= index + 1 %>">프로젝트 <%= index + 1 %></label>
+                <input type="text" id="localRepoPath<%= index + 1 %>" name="projects[]" class="repo-input" value="<%= project %>" placeholder="Enter Local Repository Path" required>
+                <button type="button" class="remove-button" onclick="removeRepoField(this)">
+                    <img src="/images/trash.svg" alt="Remove" class="trash-icon">
+                </button>
             </div>
         <% }); %>
-
+    
         <div id="additionalRepos"></div> <!-- Placeholder for dynamically added fields -->
     </div>
+    
 
     <!-- Right Pane -->
     <div class="card half-width settings-page right-pane">
