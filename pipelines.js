@@ -1,16 +1,16 @@
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
 const fs = require('fs-extra');
 const path = require('path');
 const simpleGit = require('simple-git');
 const util = require('util');
 const execPromise = util.promisify(require('child_process').exec);
-
 const codesonarWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar";
 const helixWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/helix";
 const vectorcastWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/vc";
 const qacStartBatSource = "C:/ProgramData/Jenkins/.jenkins/workspace/qac_start.bat";
 const qacStartBatDest = path.join(helixWorkspacePath, 'qac_start.bat');
-const githubToken = process.env.GITHUB_TOKEN;
-const repoUrl = `https://${githubToken}@github.com/sjparkmds/a.git`;
+const repoUrl = `https://${process.env.GITHUB_TOKEN}@github.com/sjparkmds/a.git`;
 const envPath = `C:/Users/sejin.park/Downloads/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi/bin;C:/ProgramData/Jenkins/.jenkins/workspace/helix/tools/openocd/bin`;
 
 
@@ -25,10 +25,10 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
         try {
             await execPromise(`rmdir /s /q "${workspacePath}"`);  // For Windows
             console.log(`[${pipelineName}] Cleanup complete at ${workspacePath}`);
-        } catch (err) {
+            } catch (err) {
             console.error(`[${pipelineName}] Failed to clean up ${workspacePath} using shell command:`, err);
             throw err;
-        }
+            }
     } else {
         console.log(`[${pipelineName}] Directory does not exist at ${workspacePath}, skipping cleanup.`);
     }
@@ -43,8 +43,7 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
 
     console.log(`[${pipelineName}] Cloning repository into ${workspacePath}`);
     try {
-        await git
-            .env('GIT_ASKPASS', gitAskpassPath)
+        await git 
             .env('GIT_TERMINAL_PROMPT', '0')
             .clone(repoUrl, workspacePath, ['--depth', '1']);
         console.log(`[${pipelineName}] Repository cloned successfully into ${workspacePath}.`);
@@ -58,7 +57,7 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
 // pipelines -------------------------------------------------------------------------------------
 const pipelineState = { status: 'Idle', progress: { codeSonar: 0, helix: 0, vectorcast: 0 }, completion: {codeSonar : false, helix: false, vectorcast: false}, completionTime: null };
 
-function resetPipelineFlags() {
+function resetPipelineState() {
     pipelineState.completion.helix = false;
     pipelineState.completion.vectorcast = false;
     pipelineState.completion.codeSonar = false;
@@ -210,6 +209,6 @@ module.exports = {
     runHelixPipeline,
     runVectorCastPipeline,
     getPipelineProgress,
-    resetPipelineFlags,
+    resetPipelineState,
     checkAllPipelinesCompletion
 };

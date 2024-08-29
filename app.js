@@ -9,7 +9,7 @@ const { BasicStrategy } = require('passport-http');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const util = require('util');
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = 3000;
@@ -187,7 +187,7 @@ function saveDataToFile(newData, filePath) {
 // ------------------------------------------------------------------------------------
 
 
-const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, resetPipelineFlags, checkAllPipelinesCompletion } = require('./pipelines');
+const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, resetPipelineState, checkAllPipelinesCompletion } = require('./pipelines');
 
 // CodeSonar Pipeline
 app.post('/run-codesonar-pipeline', (req, res) => {
@@ -226,7 +226,7 @@ app.post('/run-vectorcast-pipeline', (req, res) => {
 // Progress
 app.post('/start-pipelines', async (req, res) => {
     try {
-        resetPipelineFlags();
+        resetPipelineState();
         await Promise.all([ runCodeSonarPipeline(), runHelixPipeline(), runVectorCastPipeline() ]);
         res.json({ status: 'Pipelines started successfully' });
     } catch (error) {
