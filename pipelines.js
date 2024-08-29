@@ -1,5 +1,3 @@
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-
 const fs = require('fs-extra');
 const path = require('path');
 const simpleGit = require('simple-git');
@@ -12,6 +10,7 @@ const qacStartBatSource = "C:/ProgramData/Jenkins/.jenkins/workspace/qac_start.b
 const qacStartBatDest = path.join(helixWorkspacePath, 'qac_start.bat');
 const repoUrl = `https://${process.env.GITHUB_TOKEN}@github.com/sjparkmds/a.git`;
 const envPath = `C:/Users/sejin.park/Downloads/arm-gnu-toolchain-13.2.rel1-mingw-w64-i686-arm-none-eabi/bin;C:/ProgramData/Jenkins/.jenkins/workspace/helix/tools/openocd/bin`;
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 
 // Artifact 
