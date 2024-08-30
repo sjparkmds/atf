@@ -840,7 +840,6 @@ label {
 
 .highcharts-data-table table {
     width: 100%;
-    max-width: 500px;
     margin: 10px auto;
     border-collapse: collapse;
     border: 1px solid #ebebeb;
