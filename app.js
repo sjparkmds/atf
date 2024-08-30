@@ -6,8 +6,6 @@ const path = require('path');
 const fs = require('fs');
 const passport = require('passport');
 const { BasicStrategy } = require('passport-http');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const util = require('util');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
@@ -16,14 +14,13 @@ const PORT = 3000;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 passport.use(new BasicStrategy(
     function(username, password, done) {
@@ -32,8 +29,6 @@ passport.use(new BasicStrategy(
         } else {return done(null, false);}
     }
 ));
-
-const settingsFilePath = path.join(__dirname, 'settings.json');
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
@@ -226,8 +221,8 @@ app.post('/run-vectorcast-pipeline', (req, res) => {
 // Progress
 app.post('/start-pipelines', async (req, res) => {
     try {
-        resetPipelineState();
-        await Promise.all([ runCodeSonarPipeline(), runHelixPipeline(), runVectorCastPipeline() ]);
+        resetPipelineState();  // Keep this to ensure a clean start
+        await Promise.all([runCodeSonarPipeline(), runHelixPipeline(), runVectorCastPipeline()]);
         res.json({ status: 'Pipelines started successfully' });
     } catch (error) {
         console.error('Error starting pipelines:', error);
@@ -235,37 +230,50 @@ app.post('/start-pipelines', async (req, res) => {
     }
 });
 
+
 app.post('/end-pipelines', async (req, res) => {
     try {
         await checkAllPipelinesCompletion();
-        res.status(200).send('Pipelines complete successfully.');
+        res.status(200).send('Pipelines completed successfully.');
     } catch (error) {
-        console.error('Error triggering pipelines complete:', error);
+        console.error('Error triggering pipelines completion:', error);
         res.status(500).send('Failed to complete pipelines.');
     }
 });
 
-app.get('/pipeline-status', (req, res) => { res.json({ status: pipelineState.status }); });
+// Get Pipeline Status
+app.get('/pipeline-status', (req, res) => {
+    res.json({ status: pipelineState.status });
+});
 
+// Get Pipeline Progress
 app.get('/pipeline-progress', (req, res) => {
-    const globalPipelineProgress = Math.round( (pipelineState.progress.codeSonar + pipelineState.progress.helix + pipelineState.progress.vectorcast) / 3 );
+    const globalPipelineProgress = Math.round((pipelineState.progress.codeSonar + pipelineState.progress.helix + pipelineState.progress.vectorcast) / 3);
     res.json({ progress: globalPipelineProgress });
 });
 
+// Get Specific Pipeline Progress
 app.get('/specific-pipeline-progress/:pipeline', async (req, res) => {
     const pipelineName = req.params.pipeline;
     const progress = await getPipelineProgress(pipelineName);
     res.json({ progress });
 });
 
+// Get Completion Time
 app.get('/completion-time', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const formattedCompletionTime = pipelineState.completionTime
-        ? pipelineState.completionTime.toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'})
+        ? pipelineState.completionTime.toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+        })
         : null;
     res.json({ completionTime: formattedCompletionTime });
 });
-
 
 // Settings
 const storage = multer.diskStorage({
@@ -275,43 +283,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-function loadSettings() {
-    console.log('Loading settings from:', settingsFilePath);
-    if (fs.existsSync(settingsFilePath)) {
-        const data = fs.readFileSync(settingsFilePath, 'utf8');
-        console.log('Raw settings data:', data);
-        try {
-            let settings = JSON.parse(data);
-            console.log('Parsed settings:', settings);
-            
-            settings.codesonar = settings.codesonar !== undefined ? settings.codesonar : true;
-            settings.helix = settings.helix !== undefined ? settings.helix : true;
-            settings.vectorcast = settings.vectorcast !== undefined ? settings.vectorcast : true;
 
-            return settings;
-        } catch (error) {
-            console.error('Error parsing settings JSON:', error);
-        }
-    }
-    console.log('Settings file not found, using defaults');
-    return {
-        codesonar: true,
-        helix: true,
-        vectorcast: true,
-        codesonarPath: '',
-        codesonarReportPath: '',
-        helixPath: '',
-        helixReportPath: '',
-        vectorcastPath: '',
-        vectorcastReportPath: '',
-        projects: []
-    };
-}
+const { loadSettings, saveSettings, createNewRepository, commitAndPushToGitHub, readJsonFile } = require('./settings');
 
-let settings = loadSettings();
-
-
-const { createNewRepository, commitAndPushToGitHub } = require('./settings');
+let settings;
+(async () => { settings = await loadSettings(); })();
 
 app.post('/settings', upload.fields([
     { name: 'vectorcast-upload', maxCount: 1 },
@@ -326,7 +302,6 @@ app.post('/settings', upload.fields([
     if (req.files['helix-upload']) { settings.helixScriptPath = req.files['helix-upload'][0].path; }
     if (req.files['codesonar-upload']) { settings.codesonarScriptPath = req.files['codesonar-upload'][0].path; }
 
-    // Save settings
     settings = {
         codesonar: !!req.body.codesonar,
         helix: !!req.body.helix,
@@ -342,7 +317,7 @@ app.post('/settings', upload.fields([
     };
 
     console.log('Settings:', settings);
-    saveSettings(settings);
+    await saveSettings(settings);
 
     if (settings.repoName) {
         try {
@@ -359,27 +334,6 @@ app.post('/settings', upload.fields([
     res.redirect('/settings');
 });
 
-
-// Function to save settings to file
-function saveSettings(settings) {
-    const settingsFilePath = path.join(__dirname, 'settings.json');
-    console.log('Saving settings:', settings); // Add this line
-    fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
-    console.log('Settings saved:', settings);
-}
-
-
-function readJsonFile(filePath) {
-    if (fs.existsSync(filePath)) {
-        const data = fs.readFileSync(filePath, 'utf8');
-        try {
-            return JSON.parse(data);
-        } catch (error) {
-            console.error(`Error parsing JSON data from ${filePath}:`, error);
-        }
-    }
-    return [];
-}
 
 app.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -428,33 +382,50 @@ app.get('/', async (req, res) => {
 });
 
 
-app.get('/settings', (req, res) => {
-    const settingsFilePath = path.join(__dirname, 'settings.json');
-    let settings = loadSettings();    
-    res.render('settings', { settings: settings, projects: settings.projects || [], currentPath: req.path });
+app.get('/settings', async (req, res) => {
+    try {
+        const settings = await loadSettings();
+        res.render('settings', { settings: settings, projects: settings.projects || [], currentPath: req.path });
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+        res.status(500).send('Failed to load settings');
+    }
 });
 
-app.get('/chart', (req, res) => {
-    const helixData = readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
-    const codesonarData = readJsonFile(path.join(__dirname, 'public', 'data', 'codesonar.json'));
-    const vectorcastData = readJsonFile(path.join(__dirname, 'public', 'data', 'vectorcast.json'));
 
-    const logEntries = settings.projects.map((projectName, index) => {
-    const helixEntry = helixData[index] || {};
-    const codesonarEntry = codesonarData[index] || {};
-    const vectorcastEntry = vectorcastData[index] || {};
+app.get('/chart', async (req, res) => {
+    try {
+        const helixData = await readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
+        const codesonarData = await readJsonFile(path.join(__dirname, 'public', 'data', 'codesonar.json'));
+        const vectorcastData = await readJsonFile(path.join(__dirname, 'public', 'data', 'vectorcast.json'));
 
-    return {
-        timestamp: pipelineState.completionTime 
-            ? pipelineState.completionTime.toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'}) 
-            : 'N/A',
-        project: projectName,
-        helixQAC: helixEntry.rulesWithViolations !== undefined ? helixEntry.rulesWithViolations : 'N/A',
-        codesonar: codesonarEntry.activeWarnings !== undefined ? codesonarEntry.activeWarnings : 'N/A',
-        vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
-    };
-});
-    res.render('chart', { currentPath: req.path, logEntries });
+        const logEntries = [];
+
+        const maxEntries = Math.max(helixData.length, codesonarData.length, vectorcastData.length);
+
+        for (let i = 0; i < maxEntries; i++) {
+            const helixEntry = helixData[i] || {};
+            const codesonarEntry = codesonarData[i] || {};
+            const vectorcastEntry = vectorcastData[i] || {};
+
+            const logEntry = {
+                timestamp: helixEntry.timestamp || codesonarEntry.lastRunTime || vectorcastEntry.created || 'N/A',
+                project: settings.projects[0] || 'Unknown Project',
+                helixQAC: helixEntry.rulesWithViolations !== undefined ? helixEntry.rulesWithViolations : 'N/A',
+                codesonar: codesonarEntry.activeWarnings !== undefined ? codesonarEntry.activeWarnings : 'N/A',
+                vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
+            };
+
+            logEntries.push(logEntry);
+        }
+
+        console.log("Accumulated Log Entries:", logEntries);
+
+        res.render('chart', { currentPath: req.path, logEntries });
+    } catch (error) {
+        console.error('Error loading log data:', error);
+        res.status(500).send('Failed to load log data');
+    }
 });
 
 

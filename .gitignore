@@ -1,3 +1,6 @@
 node_modules/
-*.json
+codesonar.json
+helix.json
+vectorcast.json
+staticData.json
 .env

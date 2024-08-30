@@ -45,7 +45,7 @@
         <div id="completion-time"><%= completionTime %></div>        
     </div>
     
-    
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let currentPath = window.location.pathname;
@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
     pollProgress(); 
     updateTime(); 
     setInterval(updateTime, 1000);
+    refreshPageData;
 });
 
 let hasCompleted = false;
@@ -89,19 +90,19 @@ const intervalId = setInterval(() => {
 }
 
 function fetchCompletionTime() {
-fetch('/completion-time')
-    .then(response => response.json())
-    .then(data => {
-        if (data.completionTime) {
-            document.getElementById('completion-time').textContent = '완료 시각 : ' + data.completionTime;
-        } else {
-            document.getElementById('completion-time').textContent = ''; // Clear if no completion time
-            console.error('Completion time is missing');
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching completion time:', error.message);
-    });
+    fetch('/completion-time')
+        .then(response => response.json())
+        .then(data => {
+            if (data.completionTime) {
+                document.getElementById('completion-time').textContent = '완료 시각 : ' + data.completionTime;
+            } else {
+                document.getElementById('completion-time').textContent = ''; // Clear if no completion time
+                console.error('Completion time is missing');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching completion time:', error.message);
+        });
 }
 
 function updateProgressBar(percentage) {
@@ -110,21 +111,10 @@ function updateProgressBar(percentage) {
     progressBar.textContent = percentage + '%';
 }
 
-
 function updateTime() {
     const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
     document.getElementById('current-time').textContent = '현재 시각 : ' + now;
 }
-
-function refreshPageData() {
-fetchHelixSummary();
-fetchCodeSonarSummary();
-fetchVectorCASTSummary();
-}
-</script>
-
-
-<script>
 
 function updateHelixResults(helixSummary) {
 if (helixSummary) {
@@ -147,6 +137,11 @@ function updateVectorCASTResults(vectorCASTSummary) {
     } else {}
 }
 
+function refreshPageData() {
+updateHelixResults();
+updateCodeSonarResults();
+updateVectorCASTResults();
+}
 
 const existingProjects = <%- JSON.stringify(projects) %>;
     existingProjects.forEach(projectName => addProjectField(projectName));
@@ -171,7 +166,6 @@ function addProjectField(projectName) {
 }
 
 </script>
-
 
 <div class="container">
     <div class="card quarter-width"><h1 class="card-title">Projects</h1></div>

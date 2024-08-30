@@ -54,14 +54,35 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
 
 
 // pipelines -------------------------------------------------------------------------------------
-const pipelineState = { status: 'Idle', progress: { codeSonar: 0, helix: 0, vectorcast: 0 }, completion: {codeSonar : false, helix: false, vectorcast: false}, completionTime: null };
+const pipelineState = { status: 'Idle', progress: { codeSonar: 0, helix: 0, vectorcast: 0 }, completion: { codeSonar: false, helix: false, vectorcast: false }, completionTime: null, completionTimes: { codeSonar: null, helix: null, vectorcast: null }
+};
 
 function resetPipelineState() {
-    pipelineState.completion.helix = false;
-    pipelineState.completion.vectorcast = false;
-    pipelineState.completion.codeSonar = false;
+    pipelineState.status = 'Idle';
+    pipelineState.progress = { codeSonar: 0, helix: 0, vectorcast: 0 };
+    pipelineState.completion = { codeSonar: false, helix: false, vectorcast: false };
+    pipelineState.completionTime = null;
+    pipelineState.completionTimes = { codeSonar: null, helix: null, vectorcast: null };  // Reset individual completion times
 }
 
+
+function checkAllPipelinesCompletion() {
+    console.log('Checking all pipelines completion...');
+    console.log('Helix:', pipelineState.completion.helix);
+    console.log('VectorCAST:', pipelineState.completion.vectorcast);
+    console.log('CodeSonar:', pipelineState.completion.codeSonar);
+
+    const allCompleted = pipelineState.completion.helix && pipelineState.completion.vectorcast && pipelineState.completion.codeSonar;
+    if (allCompleted) {
+        const latestCompletionTime = new Date(Math.max(
+            pipelineState.completionTimes.helix.getTime(),
+            pipelineState.completionTimes.vectorcast.getTime(),
+            pipelineState.completionTimes.codeSonar.getTime()
+        ));
+        pipelineState.completionTime = latestCompletionTime;
+        console.log('Completion time updated:', pipelineState.completionTime);
+    }
+}
 
 async function runCodeSonarPipeline() {
     try {
@@ -107,6 +128,7 @@ async function runCodeSonarPipeline() {
         console.log("CodeSonar pipeline completed successfully.");
 
         pipelineState.completion.codeSonar = true;
+        pipelineState.completionTimes.codeSonar = new Date();  
         checkAllPipelinesCompletion();
     } catch (error) {
         console.error("CodeSonar pipeline failed:", error);
@@ -140,7 +162,7 @@ async function runHelixPipeline() {
         console.log("Helix QAC pipeline completed successfully.");
 
         pipelineState.completion.helix = true;
-        console.log('Helix completion flag set to true.');
+        pipelineState.completionTimes.helix = new Date(); 
         checkAllPipelinesCompletion();
     } catch (error) {
         console.error("Helix QAC pipeline failed:", error);
@@ -170,7 +192,7 @@ async function runVectorCastPipeline() {
         console.log("VectorCAST pipeline completed successfully.");
 
         pipelineState.completion.vectorcast = true;
-        console.log('VectorCAST completion flag set to true.');
+        pipelineState.completionTimes.vectorcast = new Date(); 
         checkAllPipelinesCompletion();
     } catch (error) {
         console.error("VectorCAST pipeline failed:", error);
@@ -185,19 +207,6 @@ async function getPipelineProgress(pipelineName) {
         case 'helix': return pipelineState.progress.helix;
         case 'vectorcast': return pipelineState.progress.vectorcast;
         default: return 0;
-    }
-}
-
-function checkAllPipelinesCompletion() {
-    console.log('Checking all pipelines completion...');
-    console.log('Helix:', pipelineState.completion.helix);
-    console.log('VectorCAST:', pipelineState.completion.vectorcast);
-    console.log('CodeSonar:', pipelineState.completion.codeSonar);
-
-    const allCompleted = pipelineState.completion.helix && pipelineState.completion.vectorcast && pipelineState.completion.codeSonar;
-    if (allCompleted) { 
-        pipelineState.completionTime = new Date();
-        console.log('Completion time updated:', pipelineState.completionTime);
     }
 }
 

@@ -1,0 +1,15 @@
+{
+  "codesonar": true,
+  "helix": true,
+  "vectorcast": true,
+  "codesonarPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
+  "codesonarReportPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
+  "helixPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
+  "helixReportPath": "",
+  "vectorcastPath": "",
+  "vectorcastReportPath": "",
+  "projects": [
+    "C:\\Users\\sejin.park\\Documents\\GitHub\\a"
+  ],
+  "repoName": "ddd"
+}

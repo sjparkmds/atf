@@ -54,33 +54,22 @@
         </div>
     </div>
 
-<div class="container">
-    <div class="table full-width">
-        <table class="rwd-table">
-            <tbody>
-                <tr>
-                    <th>분석 완료 시각</th>
-                    <th>프로젝트</th>
-                    <th>Helix QAC</th>
-                    <th>CodeSonar</th>
-                    <th>VectorCAST</th>
-                </tr>
-                <% logEntries.forEach(entry => { %>
+    <div class="container">
+        <div class="table full-width">
+            <table class="rwd-table">
+                <tbody>
                     <tr>
-                        <td><%= entry.timestamp %></td>
-                        <td><%= entry.project %></td>
-                        <td><%= entry.helixQAC %></td>
-                        <td><%= entry.codesonar %></td>
-                        <td><%= entry.vectorcast %></td>
+                        <th>분석 완료 시각</th><th>프로젝트</th><th>Helix QAC</th><th>CodeSonar</th><th>VectorCAST</th>
                     </tr>
-                <% }) %>
-            </tbody>
-        </table>
-       </div> 
-</div>    
-
-
-
+                    <% logEntries.forEach(entry => { %>
+                    <tr>
+                        <td><%= entry.timestamp %></td><td><%= entry.project %></td><td><%= entry.helixQAC %></td><td><%= entry.codesonar %></td><td><%= entry.vectorcast %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div> 
+    </div>
 
 <script>
 // global start

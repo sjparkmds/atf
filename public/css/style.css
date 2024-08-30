@@ -34,7 +34,7 @@ html, body {
     transform: translateX(-50%);
     text-align: center;
     z-index: 0; /* Keeps the title below the logo and menu in stacking order */
-    white-space: nowrap; /* Prevents the title from wrapping to multiple lines */
+    white-space: wrap; /* Prevents the title from wrapping to multiple lines */
 }
 
 .header .title-container h1 {
@@ -216,6 +216,9 @@ html, body {
     justify-content: space-between;
 }
 
+#buttons {
+    padding: 20px;
+}
 
 .rwd-table {
     width: 100%;
@@ -444,7 +447,6 @@ html, body {
 .card.full-width-inactive p {
     font-size: 1em;
 }
-
 
 .sourcecode {
     color: grey;
