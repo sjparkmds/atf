@@ -242,25 +242,21 @@ app.post('/end-pipelines', async (req, res) => {
     }
 });
 
-// Get Pipeline Status
 app.get('/pipeline-status', (req, res) => {
     res.json({ status: pipelineState.status });
 });
 
-// Get Pipeline Progress
 app.get('/pipeline-progress', (req, res) => {
     const globalPipelineProgress = Math.round((pipelineState.progress.codeSonar + pipelineState.progress.helix + pipelineState.progress.vectorcast) / 3);
     res.json({ progress: globalPipelineProgress });
 });
 
-// Get Specific Pipeline Progress
 app.get('/specific-pipeline-progress/:pipeline', async (req, res) => {
     const pipelineName = req.params.pipeline;
     const progress = await getPipelineProgress(pipelineName);
     res.json({ progress });
 });
 
-// Get Completion Time
 app.get('/completion-time', (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
     const formattedCompletionTime = pipelineState.completionTime
@@ -369,7 +365,7 @@ app.get('/', async (req, res) => {
 
     const projects = settings.projects || [];
 
-    res.render('dashboard', {
+    res.render('home', {
         helixSummary,
         vectorCASTSummary,
         codesonarSummary,
@@ -393,8 +389,7 @@ app.get('/settings', async (req, res) => {
     }
 });
 
-
-app.get('/log', async (req, res) => {
+app.get('/logs', async (req, res) => {
     try {
         const helixData = await readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
         const codesonarData = await readJsonFile(path.join(__dirname, 'public', 'data', 'codesonar.json'));
@@ -422,7 +417,7 @@ app.get('/log', async (req, res) => {
 
         console.log("Accumulated Log Entries:", logEntries);
 
-        res.render('log', { currentPath: req.path, logEntries });
+        res.render('logs', { currentPath: req.path, logEntries });
     } catch (error) {
         console.error('Error loading log data:', error);
         res.status(500).send('Failed to load log data');

@@ -3,6 +3,7 @@ const path = require('path');
 const simpleGit = require('simple-git');
 const util = require('util');
 const execPromise = util.promisify(require('child_process').exec);
+
 const codesonarWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar";
 const helixWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/helix";
 const vectorcastWorkspacePath = "C:/ProgramData/Jenkins/.jenkins/workspace/vc";
@@ -54,35 +55,54 @@ async function cloneRepository(repoUrl, workspacePath, pipelineName) {
 
 
 // pipelines -------------------------------------------------------------------------------------
-const pipelineState = { status: 'Idle', progress: { codeSonar: 0, helix: 0, vectorcast: 0 }, completion: { codeSonar: false, helix: false, vectorcast: false }, completionTime: null, completionTimes: { codeSonar: null, helix: null, vectorcast: null }
-};
+let pipelineState = {};  // To hold pipeline state for each project
 
-function resetPipelineState() {
-    pipelineState.status = 'Idle';
-    pipelineState.progress = { codeSonar: 0, helix: 0, vectorcast: 0 };
-    pipelineState.completion = { codeSonar: false, helix: false, vectorcast: false };
-    pipelineState.completionTime = null;
-    pipelineState.completionTimes = { codeSonar: null, helix: null, vectorcast: null };  // Reset individual completion times
+// Load settings and initialize the pipelines for all projects
+async function initializePipelines() {
+    const settings = await loadSettings();
+    pipelineState = {};  // Reset pipeline state
+
+    settings.projects.forEach(project => {
+        pipelineState[project.name] = {
+            status: 'Idle',
+            progress: { codeSonar: 0, helix: 0, vectorcast: 0 },
+            completion: { codeSonar: false, helix: false, vectorcast: false },
+            completionTime: null,
+            completionTimes: { codeSonar: null, helix: null, vectorcast: null },
+            paths: {
+                codesonar: project.codesonarPath,
+                helix: project.helixPath,
+                vectorcast: project.vectorcastPath
+            }
+        };
+    });
 }
 
+function resetPipelineState(projectName) {
+    const project = pipelineState[projectName];
+    project.status = 'Idle';
+    project.progress = { codeSonar: 0, helix: 0, vectorcast: 0 };
+    project.completion = { codeSonar: false, helix: false, vectorcast: false };
+    project.completionTime = null;
+    project.completionTimes = { codeSonar: null, helix: null, vectorcast: null };
+}
 
-function checkAllPipelinesCompletion() {
-    console.log('Checking all pipelines completion...');
-    console.log('Helix:', pipelineState.completion.helix);
-    console.log('VectorCAST:', pipelineState.completion.vectorcast);
-    console.log('CodeSonar:', pipelineState.completion.codeSonar);
+function checkAllPipelinesCompletion(projectName) {
+    const project = pipelineState[projectName];
+    console.log(`[${projectName}] Checking all pipelines completion...`);
 
-    const allCompleted = pipelineState.completion.helix && pipelineState.completion.vectorcast && pipelineState.completion.codeSonar;
+    const allCompleted = project.completion.helix && project.completion.vectorcast && project.completion.codeSonar;
     if (allCompleted) {
         const latestCompletionTime = new Date(Math.max(
-            pipelineState.completionTimes.helix.getTime(),
-            pipelineState.completionTimes.vectorcast.getTime(),
-            pipelineState.completionTimes.codeSonar.getTime()
+            project.completionTimes.helix?.getTime() || 0,
+            project.completionTimes.vectorcast?.getTime() || 0,
+            project.completionTimes.codeSonar?.getTime() || 0
         ));
-        pipelineState.completionTime = latestCompletionTime;
-        console.log('Completion time updated:', pipelineState.completionTime);
+        project.completionTime = latestCompletionTime;
+        console.log(`[${projectName}] Completion time updated:`, project.completionTime);
     }
 }
+
 
 async function runCodeSonarPipeline() {
     try {
@@ -209,7 +229,6 @@ async function getPipelineProgress(pipelineName) {
         default: return 0;
     }
 }
-
 
 module.exports = {
     pipelineState,
