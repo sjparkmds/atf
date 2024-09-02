@@ -1,4 +1,5 @@
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const session = require('express-session');
@@ -393,7 +394,7 @@ app.get('/settings', async (req, res) => {
 });
 
 
-app.get('/chart', async (req, res) => {
+app.get('/log', async (req, res) => {
     try {
         const helixData = await readJsonFile(path.join(__dirname, 'public', 'data', 'helix.json'));
         const codesonarData = await readJsonFile(path.join(__dirname, 'public', 'data', 'codesonar.json'));
@@ -421,7 +422,7 @@ app.get('/chart', async (req, res) => {
 
         console.log("Accumulated Log Entries:", logEntries);
 
-        res.render('chart', { currentPath: req.path, logEntries });
+        res.render('log', { currentPath: req.path, logEntries });
     } catch (error) {
         console.error('Error loading log data:', error);
         res.status(500).send('Failed to load log data');
