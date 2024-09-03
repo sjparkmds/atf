@@ -2,14 +2,17 @@
   "codesonar": true,
   "helix": true,
   "vectorcast": true,
-  "codesonarPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
-  "codesonarReportPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
-  "helixPath": "C:\\ProgramData\\Jenkins\\.jenkins\\workspace",
-  "helixReportPath": "",
-  "vectorcastPath": "",
-  "vectorcastReportPath": "",
   "projects": [
-    "C:\\Users\\sejin.park\\Documents\\GitHub\\a"
+    {
+      "repoName": "a",
+      "repoUrl": "https://github.com/sjparkmds/a.git",
+      "codesonarPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/codesonar",
+      "codesonarReportPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/codesonar/codesonar_output.txt",
+      "helixPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/helix",
+      "helixReportPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/helix/prqa/configs/Initial/reports",
+      "vectorcastPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/vectorcast",
+      "vectorcastReportPath": "C:/Environments/test/abc.html"
+    }
   ],
-  "repoName": "ddd"
+  "repoName": "a"
 }

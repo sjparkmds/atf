@@ -3,6 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const fs = require('fs').promises;
 
+/*
 async function createNewRepository(repoName, description) {
   const githubToken = process.env.GITHUB_TOKEN;
   const url = `https://api.github.com/repos/${githubToken.split(':')[0]}/${repoName}`;
@@ -38,9 +39,7 @@ async function createRepository(repoName, description) {
   };
 
   const data = {
-    name: repoName,
-    description: description,
-    private: true
+    name: repoName, private: true
   };
 
   try {
@@ -93,34 +92,48 @@ async function commitAndPushToGitHub(localRepoPath, repoUrl) {
         throw error;
     }
 }
+*/
 
 async function loadSettings() {
   const settingsFilePath = path.join(__dirname, 'settings.json');
   console.log('Loading settings from:', settingsFilePath);
   try {
       const data = await fs.readFile(settingsFilePath, 'utf8');
-      let settings = JSON.parse(data);
+      const settings = JSON.parse(data);
 
-      settings.projects = settings.projects || []; 
-      settings.codesonar = settings.codesonar !== undefined ? settings.codesonar : true;
-      settings.helix = settings.helix !== undefined ? settings.helix : true;
-      settings.vectorcast = settings.vectorcast !== undefined ? settings.vectorcast : true;
+      // Ensure all projects have the necessary fields
+      settings.projects.forEach(project => {
+          project.repoName = project.repoName || 'defaultRepoName';
+          project.repoUrl = project.repoUrl || '';
+          project.codesonarPath = project.codesonarPath || '';
+          project.codesonarReportPath = project.codesonarReportPath || '';
+          project.helixPath = project.helixPath || '';
+          project.helixReportPath = project.helixReportPath || '';
+          project.vectorcastPath = project.vectorcastPath || '';
+          project.vectorcastReportPath = project.vectorcastReportPath || '';
+      });
 
       return settings;
   } catch (error) {
       if (error.code === 'ENOENT') {
           console.log('Settings file not found, using defaults');
+          // Return default settings if the file doesn't exist
           return {
               codesonar: true,
               helix: true,
               vectorcast: true,
-              codesonarPath: '',
-              codesonarReportPath: '',
-              helixPath: '',
-              helixReportPath: '',
-              vectorcastPath: '',
-              vectorcastReportPath: '',
-              projects: [] 
+              projects: [
+                  {
+                      repoName: "defaultRepoName",
+                      repoUrl: "",
+                      codesonarPath: "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar",
+                      codesonarReportPath: "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar/codesonar_output.txt",
+                      helixPath: "C:/ProgramData/Jenkins/.jenkins/workspace/helix",
+                      helixReportPath: "C:/ProgramData/Jenkins/.jenkins/workspace/helix/prqa/configs/Initial/reports",
+                      vectorcastPath: "C:/ProgramData/Jenkins/.jenkins/workspace/vectorcast",
+                      vectorcastReportPath: "C:/Environments/test/abc.html"
+                  }
+              ]
           };
       } else {
           console.error('Error loading settings:', error.message);
@@ -141,6 +154,7 @@ async function saveSettings(settings) {
   }
 }
 
+
 async function readJsonFile(filePath) {
   try {
       const data = await fs.readFile(filePath, 'utf8');
@@ -157,6 +171,6 @@ module.exports = {
   loadSettings,
   saveSettings,
   readJsonFile,
-  createNewRepository,
-  commitAndPushToGitHub
+//  createNewRepository,
+ // commitAndPushToGitHub
 };

@@ -8,6 +8,15 @@ const fs = require('fs');
 const passport = require('passport');
 const { BasicStrategy } = require('passport-http');
 const util = require('util');
+const { loadSettings, saveSettings, createNewRepository, commitAndPushToGitHub, readJsonFile } = require('./settings');
+const { 
+    pipelineState,
+    initializePipelines,
+    runAllPipelines,
+    resetPipelineState,
+    checkAllPipelinesCompletion,
+    getPipelineProgress
+} = require('./pipelines');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
@@ -36,25 +45,161 @@ function formatDate(dateStr) {
     return date.toLocaleString('ko-KR', {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'});
 }
 
+
+let settings;
+
+(async () => {
+    try {
+        settings = await loadSettings();
+        console.log('Settings loaded:', settings);
+
+        await initializePipelines(settings);
+        console.log('Pipeline state after initialization:', JSON.stringify(pipelineState, null, 2));
+
+        // Place another log here to confirm pipelineState right before starting the server
+        console.log('Final pipeline state before server start:', JSON.stringify(pipelineState, null, 2));
+
+        app.listen(PORT, () => {
+            console.log(`Server is running on http://localhost:${PORT}/`);
+        });
+
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        process.exit(1);
+    }
+})();
+
+app.get('/', async (req, res) => {
+    console.log('Current pipelineState before accessing repoName:', JSON.stringify(pipelineState, null, 2)); 
+    const repoName = settings.projects[0].repoName;
+
+    console.log(`Accessing pipeline state for repoName: ${repoName}`);
+
+    if (!pipelineState[repoName]) {
+        console.error(`Pipeline state not found for repoName: ${repoName}`);
+        return res.status(500).send('Pipeline state not found for the specified repoName.');
+    }
+
+    const latestReport = findLatestReport(repoName);
+    const latestHelixReportLink = latestReport ? path.basename(latestReport) : null;
+
+    let helixSummary = null;
+    let vectorCASTSummary = null;
+    let codesonarSummary = null;
+
+    const codesonarOutputFile = pipelineState[repoName].paths.codesonar;
+
+    if (settings.helix && latestReport) {
+        try {
+            const data = fs.readFileSync(latestReport, 'utf8');
+            helixSummary = extractSummary(data);
+        } catch (error) {
+            console.error("Error parsing Helix QAC data:", error);
+        }
+    }
+
+    if (settings.vectorcast && fs.existsSync(pipelineState[repoName].paths.vectorcast)) {
+        try {
+            const data = fs.readFileSync(pipelineState[repoName].paths.vectorcast, 'utf8');
+            vectorCASTSummary = extractVectorCASTSummary(data);
+        } catch (error) {
+            console.error("Error parsing VectorCAST data:", error);
+        }
+    }
+
+    if (settings.codesonar && fs.existsSync(codesonarOutputFile)) {
+        try {
+            codesonarSummary = parseCodeSonarOutput(repoName);
+        } catch (error) {
+            console.error("Error parsing CodeSonar data:", error);
+        }
+    }
+
+    const now = new Date().toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+    });
+
+    const projects = settings.projects || [];
+
+    res.render('home', {
+        helixSummary,
+        vectorCASTSummary,
+        codesonarSummary,
+        latestHelixReportLink,
+        vectorCASTReportPath: pipelineState[repoName].paths.vectorcast,
+        currentTime: now,
+        completionTime: pipelineState[repoName].completionTime,
+        currentPath: req.path,
+        projects
+    });
+});
+
+
+function getReportPathForProject(repoName, reportType) {
+    if (!repoName || !reportType) {
+        console.error('Invalid repoName or reportType:', { repoName, reportType });
+        throw new TypeError('Invalid repoName or reportType');
+    }
+
+    const reportDirMap = {
+        'helix': path.join(repoName, 'prqa', 'configs', 'Initial', 'reports'),
+        'codesonar': path.join(repoName, 'codesonar_output.txt'),
+        'vectorcast': path.join('C:/Environments/test', 'abc.html')
+    };
+
+    const reportPath = reportDirMap[reportType];
+    if (!reportPath) {
+        console.error('Unknown report type:', reportType);
+        throw new TypeError('Unknown report type');
+    }
+
+    return reportPath;
+}
+
 // Helix QAC
-const reportsDir = "C:\\ProgramData\\Jenkins\\.jenkins\\workspace\\helix\\prqa\\configs\\Initial\\reports";
+function findLatestReport(repoName) {
+    if (!repoName) {
+        console.error('Received undefined repoName in findLatestReport');
+        return null;
+    }
 
-function findLatestReport() {
-        if (!fs.existsSync(reportsDir)) {return null;}
+    // Find the project associated with the repoName
+    const project = settings.projects.find(p => p.repoName === repoName);
 
-        const files = fs.readdirSync(reportsDir);
-        const reportFiles = files.filter(file => file.startsWith('helix_SCR_') && file.endsWith('.html'));
-            
-        if (reportFiles.length === 0) {return null;}
+    if (!project || !project.helixPath) {
+        console.error('Helix path is not defined for the specified repoName:', repoName);
+        return null;
+    }
 
-        const latestReport = reportFiles.reduce((latest, file) => {
+    const reportsDir = path.join(project.helixPath, 'prqa', 'configs', 'Initial', 'reports');
+    if (!fs.existsSync(reportsDir)) {
+        console.error('Reports directory does not exist:', reportsDir);
+        return null;
+    }
+
+    const files = fs.readdirSync(reportsDir);
+    const reportFiles = files.filter(file => file.startsWith('helix_SCR_') && file.endsWith('.html'));
+
+    if (reportFiles.length === 0) {
+        console.log('No Helix report files found in:', reportsDir);
+        return null;
+    }
+
+    const latestReport = reportFiles.reduce((latest, file) => {
         const latestTime = extractTimestamp(latest);
         const fileTime = extractTimestamp(file);
-        
         return fileTime > latestTime ? file : latest;
     });
+
     return path.join(reportsDir, latestReport);
 }
+
+
 
 function extractTimestamp(filename) {
     const match = filename.match(/helix_SCR_(\d{8}_\d{6})/);
@@ -87,12 +232,21 @@ function extractSummary(html) {
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'helix.json'));
     return result;
 }
-// -------------------------------------
+// -----------------------------------------------------------------------------
 
 // Codesonar
-const codesonarOutputFile = "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar/codesonar_output.txt";
+function parseCodeSonarOutput(repoName) {
+    // Find the project associated with the repoName
+    const project = settings.projects.find(p => p.repoName === repoName);
 
-function parseCodeSonarOutput(filePath) {
+    if (!project || !project.codesonarReportPath) {
+        console.error('CodeSonar path is not defined for the specified repoName:', repoName);
+        return null;
+    }
+
+    const filePath = project.codesonarReportPath;
+    if (!fs.existsSync(filePath)) return null;
+
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
     let totalWarnings = 0;
@@ -104,19 +258,31 @@ function parseCodeSonarOutput(filePath) {
         if (line.startsWith('  Reporting')) {
             totalWarnings++;
             const filePathMatch = line.match(/at (.*?):\d+/);
-            if (filePathMatch) {filePaths.add(filePathMatch[1]);}
+            if (filePathMatch) {
+                filePaths.add(filePathMatch[1]);
+            }
         }
-        if (line.includes('Time Elapsed')) {lastRunTime = line.match(/\[(.*?)\]/)[1];}
+        if (line.includes('Time Elapsed')) {
+            const match = line.match(/\[(.*?)\]/);
+            if (match) {
+                lastRunTime = match[1];
+            }
+        }
     });
 
     lastRunTime = formatDate(lastRunTime);
     activeWarnings = totalWarnings - activeWarnings;
 
-    const result = { total: totalWarnings,lastRunTime,activeWarnings };
+    const result = {
+        total: totalWarnings,
+        lastRunTime,
+        activeWarnings
+    };
+
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'codesonar.json'));
     return result;
 }
-// ----------------------------------------------------
+// -------------------------------------------------------------------------------------------
 
 // VectorCAST
 const vectorCASTReportPath = 'C:/Environments/test/abc.html';
@@ -183,7 +349,6 @@ function saveDataToFile(newData, filePath) {
 // ------------------------------------------------------------------------------------
 
 
-const { pipelineState, runCodeSonarPipeline, runHelixPipeline, runVectorCastPipeline, getPipelineProgress, resetPipelineState, checkAllPipelinesCompletion } = require('./pipelines');
 
 // CodeSonar Pipeline
 app.post('/run-codesonar-pipeline', (req, res) => {
@@ -222,15 +387,16 @@ app.post('/run-vectorcast-pipeline', (req, res) => {
 // Progress
 app.post('/start-pipelines', async (req, res) => {
     try {
-        resetPipelineState();  // Keep this to ensure a clean start
-        await Promise.all([runCodeSonarPipeline(), runHelixPipeline(), runVectorCastPipeline()]);
+        // Optionally re-initialize pipelineState here if you really need it.
+        // await initializePipelines(settings); 
+
+        await runAllPipelines();  // Start pipelines
         res.json({ status: 'Pipelines started successfully' });
     } catch (error) {
         console.error('Error starting pipelines:', error);
         res.status(500).json({ error: 'Failed to start pipelines' });
     }
 });
-
 
 app.post('/end-pipelines', async (req, res) => {
     try {
@@ -280,11 +446,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-
-const { loadSettings, saveSettings, createNewRepository, commitAndPushToGitHub, readJsonFile } = require('./settings');
-
-let settings;
-(async () => { settings = await loadSettings(); })();
+app.get('/settings', async (req, res) => {
+    try {
+        const settings = await loadSettings();
+        // Ensure settings are passed to the template and include all relevant fields
+        res.render('settings', { settings, projects: settings.projects, currentPath: req.path });
+    } catch (error) {
+        console.error('Failed to load settings:', error);
+        res.status(500).send('Failed to load settings');
+    }
+});
 
 app.post('/settings', upload.fields([
     { name: 'vectorcast-upload', maxCount: 1 },
@@ -295,99 +466,57 @@ app.post('/settings', upload.fields([
     console.log('Received body:', req.body);
     console.log('Received files:', req.files);
 
-    if (req.files['vectorcast-upload']) { settings.vectorcastScriptPath = req.files['vectorcast-upload'][0].path; }
-    if (req.files['helix-upload']) { settings.helixScriptPath = req.files['helix-upload'][0].path; }
-    if (req.files['codesonar-upload']) { settings.codesonarScriptPath = req.files['codesonar-upload'][0].path; }
+    // Load existing settings to ensure we don't lose data
+    let existingSettings = await loadSettings();
 
+    // Reconstruct the projects array properly, preserving existing settings if not provided in the form
+    const projects = req.body.repoNames.map((repoName, index) => ({
+        repoName,
+        repoUrl: req.body.projects[index] || existingSettings.projects[index]?.repoUrl || '',
+        codesonarPath: req.body['codesonar-path'] || existingSettings.projects[index]?.codesonarPath || '',
+        codesonarReportPath: req.body['codesonar-report-path'] || existingSettings.projects[index]?.codesonarReportPath || '',
+        helixPath: req.body['helix-path'] || existingSettings.projects[index]?.helixPath || '',
+        helixReportPath: req.body['helix-report-path'] || existingSettings.projects[index]?.helixReportPath || '',
+        vectorcastPath: req.body['vectorcast-path'] || existingSettings.projects[index]?.vectorcastPath || '',
+        vectorcastReportPath: req.body['vectorcast-report-path'] || existingSettings.projects[index]?.vectorcastReportPath || ''
+    }));
+
+    // Update settings object, merging with existing settings
     settings = {
         codesonar: !!req.body.codesonar,
         helix: !!req.body.helix,
         vectorcast: !!req.body.vectorcast,
-        codesonarPath: req.body['codesonar-path'] || settings.codesonarPath,
-        codesonarReportPath: req.body['codesonar-report-path'] || settings.codesonarReportPath,
-        helixPath: req.body['helix-path'] || settings.helixPath,
-        helixReportPath: req.body['helix-report-path'] || settings.helixReportPath,
-        vectorcastPath: req.body['vectorcast-path'] || settings.vectorcastPath,
-        vectorcastReportPath: req.body['vectorcast-report-path'] || settings.vectorcastReportPath,
-        projects: req.body.projects || settings.projects,
-        repoName: req.body.repoName || settings.repoName,
+        projects: projects,
+        repoName: req.body.repoNames[0] || existingSettings.repoName // Ensure this is set correctly
     };
 
     console.log('Settings:', settings);
     await saveSettings(settings);
 
-    if (settings.repoName) {
-        try {
-            const repo = await createNewRepository(settings.repoName);
-            const localRepoPath = settings.projects[0];
-            await commitAndPushToGitHub(localRepoPath, repo.clone_url);
-
-            console.log(`Repository setup complete: ${repo.html_url}`);
-        } catch (err) {
-            console.error(`Failed to create repository: ${err.message}`);
-            return res.status(500).send(`Error: ${err.message}`);
-        }
-    }
     res.redirect('/settings');
 });
 
 
-app.get('/', async (req, res) => {
-    res.setHeader('Cache-Control', 'no-store');
-    const latestReport = findLatestReport();
-    const latestHelixReportLink = latestReport ? path.basename(latestReport) : null;
 
-    let helixSummary = null;
-    let vectorCASTSummary = null;
-    let codesonarSummary = null;
-
-    if (settings.helix && latestReport) {
-        try {
-            const data = fs.readFileSync(latestReport, 'utf8');
-            helixSummary = extractSummary(data);
-        } catch (error) { console.error("Error parsing Helix QAC data:", error); }
-    }
-
-    if (settings.vectorcast && fs.existsSync(vectorCASTReportPath)) {
-        try {
-            const data = fs.readFileSync(vectorCASTReportPath, 'utf8');
-            vectorCASTSummary = extractVectorCASTSummary(data);
-        } catch (error) { console.error("Error parsing VectorCAST data:", error); }
-    }
-
-    if (settings.codesonar && fs.existsSync(codesonarOutputFile)) {
-        try {
-            codesonarSummary = parseCodeSonarOutput(codesonarOutputFile);
-        } catch (error) { console.error("Error parsing CodeSonar data:", error); }
-    }
-
-    const now = new Date().toLocaleString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'});
-
-    const projects = settings.projects || [];
-
-    res.render('home', {
-        helixSummary,
-        vectorCASTSummary,
-        codesonarSummary,
-        latestHelixReportLink,
-        vectorCASTReportPath,
-        currentTime: now,
-        completionTime: pipelineState.completionTime, 
-        currentPath: req.path,
-        projects 
-    });
-});
-
-
-app.get('/settings', async (req, res) => {
+app.get('/get-report', (req, res) => {
     try {
-        const settings = await loadSettings();
-        res.render('settings', { settings: settings, projects: settings.projects || [], currentPath: req.path });
+        const repoName = req.query.repoName;  // e.g., 'project1'
+        const reportType = req.query.reportType;  // e.g., 'helix', 'codesonar', 'vectorcast'
+
+        const reportPath = getReportPathForProject(repoName, reportType);
+
+        if (!fs.existsSync(reportPath)) {
+            return res.status(404).send('Report not found');
+        }
+
+        res.sendFile(reportPath);
     } catch (error) {
-        console.error('Failed to load settings:', error);
-        res.status(500).send('Failed to load settings');
+        console.error('Error fetching report:', error);
+        res.status(500).send('Failed to fetch report');
     }
 });
+
+
 
 app.get('/logs', async (req, res) => {
     try {
@@ -406,7 +535,7 @@ app.get('/logs', async (req, res) => {
 
             const logEntry = {
                 timestamp: helixEntry.timestamp || codesonarEntry.lastRunTime || vectorcastEntry.created || 'N/A',
-                project: settings.projects[0] || 'Unknown Project',
+                project: settings.projects[0].repoName || 'Unknown Project',
                 helixQAC: helixEntry.rulesWithViolations !== undefined ? helixEntry.rulesWithViolations : 'N/A',
                 codesonar: codesonarEntry.activeWarnings !== undefined ? codesonarEntry.activeWarnings : 'N/A',
                 vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
@@ -424,26 +553,65 @@ app.get('/logs', async (req, res) => {
     }
 });
 
+app.get('/helix-summary', (req, res) => {
+    const repoName = settings.projects[0].repoName;
+    const latestReport = findLatestReport(repoName);
 
+    if (!latestReport) {
+        return res.status(404).send('Helix report not found');
+    }
 
-app.get('/helix-summary', (req, res) => { res.json({ helixSummary: pipelineState.helixSummary }); });
+    try {
+        const reportData = fs.readFileSync(latestReport, 'utf8');
+        const summary = extractSummary(reportData);
+        res.json({ helixSummary: summary });
+    } catch (error) {
+        console.error('Error reading Helix report:', error);
+        res.status(500).send('Error reading Helix report');
+    }
+});
 
-app.get('/codesonar-summary', (req, res) => { res.json({ codesonarSummary: pipelineState.codesonarSummary }); });
-
-app.get('/vectorcast-summary', (req, res) => { res.json({ vectorCASTSummary: pipelineState.vectorCASTSummary }); });
 
 app.get('/helix', (req, res) => {
-    const latestReport = findLatestReport();
-    if (!latestReport) { return res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
-    res.sendFile(latestReport);
+    const project = settings.projects[0]; // Example: Select the first project
+    const helixReportPath = project.helixReportPath;
+    if (!fs.existsSync(helixReportPath)) {
+        return res.status(404).send('Report not found');
+    }
+    res.sendFile(helixReportPath);
+});
+
+app.get('/vectorcast-summary', (req, res) => {
+    res.json({ vectorCASTSummary: pipelineState.vectorCASTSummary });
 });
 
 app.get('/vectorcast', (req, res) => {
-    const vectorCASTReportPath = path.resolve('C:/Environments/test/abc.html');
-    if (fs.existsSync(vectorCASTReportPath)) { res.sendFile(vectorCASTReportPath);
-    } else { res.status(404).send('리포트 생성 중 오류가 발생하였습니다'); }
+    const project = settings.projects[0]; // Example: Select the first project
+    const vectorCASTReportPath = project.vectorcastReportPath;
+    if (fs.existsSync(vectorCASTReportPath)) {
+        res.sendFile(vectorCASTReportPath);
+    } else {
+        res.status(404).send('리포트 생성 중 오류가 발생하였습니다');
+    }
 });
 
-app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => { res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1'); });
+app.get('/codesonar-summary', (req, res) => {
+    const repoName = settings.projects[0].repoName; // Example: Select the first project
+    const codesonarSummary = parseCodeSonarOutput(repoName);
+    
+    if (codesonarSummary) {
+        res.json({ codesonarSummary });
+    } else {
+        res.status(404).send('CodeSonar report not found');
+    }
+});
 
-app.listen(PORT, () => { console.log(`Server is running on http://localhost:${PORT}/`); });
+
+app.get('/codesonar', passport.authenticate('basic', { session: false }), (req, res) => {
+    res.redirect('http://127.0.0.1:7340/report/last-hub.html?toc_page_level=-1');
+});
+
+/*
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}/`);
+});*/
