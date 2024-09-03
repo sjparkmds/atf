@@ -5,14 +5,13 @@
   "projects": [
     {
       "repoName": "a",
-      "repoUrl": "https://github.com/sjparkmds/a.git",
+      "workspacePath": "C:/ProgramData/Jenkins/.jenkins/workspace/a",
       "codesonarPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/codesonar",
-      "codesonarReportPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/codesonar/codesonar_output.txt",
+      "codesonarReportPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/codesonar",
       "helixPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/helix",
       "helixReportPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/helix/prqa/configs/Initial/reports",
-      "vectorcastPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/vectorcast",
-      "vectorcastReportPath": "C:/Environments/test/abc.html"
+      "vectorcastPath": "C:/ProgramData/Jenkins/.jenkins/workspace/a/vc",
+      "vectorcastReportPath": "C:/Environments/test"
     }
-  ],
-  "repoName": "a"
+  ]
 }

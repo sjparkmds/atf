@@ -18,15 +18,15 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 // Artifact 
 let pipelineState = {};  // Declare and initialize pipelineState here
 
+// Assuming pipelineState is declared globally and initialized as an empty object
 async function initializePipelines(settings) {
     console.log('Initializing pipelines with settings:', JSON.stringify(settings, null, 2)); // Log settings
-
-    pipelineState = {};  // Reset pipeline state
 
     settings.projects.forEach((project, index) => {
         const { repoName, codesonarPath, helixPath, vectorcastPath } = project;
         console.log(`Processing project #${index}:`, JSON.stringify(project, null, 2)); // Log each project
 
+        // Populate pipelineState without reassigning it
         pipelineState[repoName] = {
             status: 'Idle',
             progress: { codeSonar: 0, helix: 0, vectorcast: 0 },
@@ -45,6 +45,7 @@ async function initializePipelines(settings) {
 
     console.log('Final pipelineState after initialization:', JSON.stringify(pipelineState, null, 2));  // Debugging log
 }
+
 
 
 async function cloneRepository(repoUrl, workspacePath, pipelineName) {
@@ -107,15 +108,13 @@ function checkAllPipelinesCompletion(repoName) {
     }
 }
 
-async function runCodeSonarPipeline(repoName) {
-    const project = pipelineState[repoName];
+async function runCodeSonarPipeline(project) {
     try {
-        console.log(`[${repoName}] Starting CodeSonar pipeline...`);
+        console.log(`[${project.repoName}] Starting CodeSonar pipeline...`);
         project.status = 'Running';
         project.progress.codeSonar = 0;
 
-        const repoUrl = settings.projects.find(p => p.repoName === repoName).repoUrl;
-        await cloneRepository(repoUrl, project.paths.codesonar, 'CodeSonar');
+        await cloneRepository(project.repoUrl, project.paths.codesonar, 'CodeSonar');
         project.progress.codeSonar = 10;
 
         await execPromise(`make -C ${project.paths.codesonar} cleanall`);
@@ -131,34 +130,33 @@ async function runCodeSonarPipeline(repoName) {
         const codesonarPrjPath = path.join(project.paths.codesonar, 'codesonar.prj');
         const codesonarPrjFilesPath = path.join(project.paths.codesonar, 'codesonar.prj_files');
         if (fs.existsSync(codesonarPrjPath)) {
-            console.log(`[${repoName}] Removing ${codesonarPrjPath}`);
+            console.log(`[${project.repoName}] Removing ${codesonarPrjPath}`);
             await fs.rm(codesonarPrjPath);
         }
 
         if (fs.existsSync(codesonarPrjFilesPath)) {
-            console.log(`[${repoName}] Removing ${codesonarPrjFilesPath}`);
+            console.log(`[${project.repoName}] Removing ${codesonarPrjFilesPath}`);
             await fs.rm(codesonarPrjFilesPath);
         }
 
         await execPromise(`cd ${project.paths.codesonar} && codesonar analyze codesonar -foreground 127.0.0.1:7340 -hubuser Administrator -hubpwfile ${pwFilePath} make -C ${project.paths.codesonar} > ${project.paths.codesonar}/codesonar_output.txt`);
         project.progress.codeSonar = 100;
-        console.log(`[${repoName}] CodeSonar pipeline completed successfully.`);
+        console.log(`[${project.repoName}] CodeSonar pipeline completed successfully.`);
 
         project.completion.codeSonar = true;
         project.completionTimes.codeSonar = new Date();
         checkAllPipelinesCompletion(repoName);
     } catch (error) {
-        console.error(`[${repoName}] CodeSonar pipeline failed:`, error);
+        console.error(`[${project.repoName}] CodeSonar pipeline failed:`, error);
         project.status = 'Failed';
         throw error;
     }
 }
 
 
-async function runHelixPipeline(repoName) {
-    const project = pipelineState[repoName];
+async function runHelixPipeline(project) {
     try {
-        console.log(`[${repoName}] Starting Helix QAC pipeline...`);
+        console.log(`[${project.repoName}] Starting Helix QAC pipeline...`);
         project.status = 'Running';
         project.progress.helix = 0;
 
@@ -171,32 +169,31 @@ async function runHelixPipeline(repoName) {
         // Copy qac_start.bat to the workspace directory
         const qacStartBatSource = path.resolve(__dirname, 'C:/ProgramData/Jenkins/.jenkins/workspace/qac_start.bat');
         const qacStartBatDest = path.join(project.paths.helix, 'qac_start.bat');
-        console.log(`[${repoName}] Copying qac_start.bat from ${qacStartBatSource} to ${qacStartBatDest}`);
+        console.log(`[${project.repoName}] Copying qac_start.bat from ${qacStartBatSource} to ${qacStartBatDest}`);
         await fs.copyFile(qacStartBatSource, qacStartBatDest);
-        console.log(`[${repoName}] qac_start.bat copied successfully.`);
+        console.log(`[${project.repoName}] qac_start.bat copied successfully.`);
 
         await execPromise(`make -C ${project.paths.helix}`);
         project.progress.helix = 50;
 
-        console.log(`[${repoName}] Executing qac_start.bat...`);
+        console.log(`[${project.repoName}] Executing qac_start.bat...`);
         await execPromise(`${qacStartBatDest}`);
         project.progress.helix = 100;
-        console.log(`[${repoName}] Helix QAC pipeline completed successfully.`);
+        console.log(`[${project.repoName}] Helix QAC pipeline completed successfully.`);
 
         project.completion.helix = true;
         project.completionTimes.helix = new Date(); 
-        checkAllPipelinesCompletion(repoName);
+        checkAllPipelinesCompletion(project.repoName);
     } catch (error) {
-        console.error(`[${repoName}] Helix QAC pipeline failed:`, error);
+        console.error(`[${project.repoName}] Helix QAC pipeline failed:`, error);
         project.status = 'Failed';
         throw error;
     }
 }
 
-async function runVectorCastPipeline(repoName) {
-    const project = pipelineState[repoName];
+async function runVectorCastPipeline(project) {
     try {
-        console.log(`[${repoName}] Starting VectorCAST pipeline...`);
+        console.log(`[${project.repoName}] Starting VectorCAST pipeline...`);
         project.status = 'Running';
         project.progress.vectorcast = 0;
 
@@ -212,13 +209,13 @@ async function runVectorCastPipeline(repoName) {
         await execPromise(`cd C:/Environments/test && C:/manage.exe -p mds --build-execute`);
         await execPromise(`cd C:/Environments/test && C:/clicast.exe -e TEST Reports Custom full abc.html`);
         project.progress.vectorcast = 100;
-        console.log(`[${repoName}] VectorCAST pipeline completed successfully.`);
+        console.log(`[${project.repoName}] VectorCAST pipeline completed successfully.`);
 
         project.completion.vectorcast = true;
         project.completionTimes.vectorcast = new Date(); 
-        checkAllPipelinesCompletion(repoName);
+        checkAllPipelinesCompletion(project.repoName);
     } catch (error) {
-        console.error(`[${repoName}] VectorCAST pipeline failed:`, error);
+        console.error(`[${project.repoName}] VectorCAST pipeline failed:`, error);
         project.status = 'Failed';
         throw error;
     }
@@ -226,10 +223,9 @@ async function runVectorCastPipeline(repoName) {
 
 async function runAllPipelines() {
     for (const project of settings.projects) {
-        const repoName = project.repoName;
-        await runCodeSonarPipeline(repoName);
-        await runHelixPipeline(repoName);
-        await runVectorCastPipeline(repoName);
+        await runCodeSonarPipeline(project);
+        await runHelixPipeline(project);
+        await runVectorCastPipeline(project);
     }
 }
 

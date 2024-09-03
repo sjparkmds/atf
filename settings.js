@@ -96,15 +96,13 @@ async function commitAndPushToGitHub(localRepoPath, repoUrl) {
 
 async function loadSettings() {
   const settingsFilePath = path.join(__dirname, 'settings.json');
-  console.log('Loading settings from:', settingsFilePath);
   try {
       const data = await fs.readFile(settingsFilePath, 'utf8');
       const settings = JSON.parse(data);
 
-      // Ensure all projects have the necessary fields
       settings.projects.forEach(project => {
           project.repoName = project.repoName || 'defaultRepoName';
-          project.repoUrl = project.repoUrl || '';
+          project.workspacePath = project.workspacePath || '';
           project.codesonarPath = project.codesonarPath || '';
           project.codesonarReportPath = project.codesonarReportPath || '';
           project.helixPath = project.helixPath || '';
@@ -115,32 +113,11 @@ async function loadSettings() {
 
       return settings;
   } catch (error) {
-      if (error.code === 'ENOENT') {
-          console.log('Settings file not found, using defaults');
-          // Return default settings if the file doesn't exist
-          return {
-              codesonar: true,
-              helix: true,
-              vectorcast: true,
-              projects: [
-                  {
-                      repoName: "defaultRepoName",
-                      repoUrl: "",
-                      codesonarPath: "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar",
-                      codesonarReportPath: "C:/ProgramData/Jenkins/.jenkins/workspace/codesonar/codesonar_output.txt",
-                      helixPath: "C:/ProgramData/Jenkins/.jenkins/workspace/helix",
-                      helixReportPath: "C:/ProgramData/Jenkins/.jenkins/workspace/helix/prqa/configs/Initial/reports",
-                      vectorcastPath: "C:/ProgramData/Jenkins/.jenkins/workspace/vectorcast",
-                      vectorcastReportPath: "C:/Environments/test/abc.html"
-                  }
-              ]
-          };
-      } else {
-          console.error('Error loading settings:', error.message);
-          throw error;
-      }
+      console.error('Error loading settings:', error.message);
+      throw error;
   }
 }
+
 
 async function saveSettings(settings) {
   const settingsFilePath = path.join(__dirname, 'settings.json');

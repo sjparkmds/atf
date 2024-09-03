@@ -48,7 +48,7 @@
         newField.className = 'form-group';
         newField.innerHTML = `
             <input type="text" id="repoName${repoCount}" name="repoNames[]" class="repo-name-input" placeholder="프로젝트명 입력" required>
-            <input type="text" id="localRepoPath${repoCount}" name="projects[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" required>
+            <input type="text" id="workspacePath${repoCount}" name="workspacePaths[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" required>
             <button type="button" class="remove-button" onclick="removeRepoField(this)">
                 <img src="/images/trash.svg" alt="Remove" class="trash-icon">
             </button>
@@ -97,7 +97,7 @@
         <% settings.projects.forEach(function(project, index) { %>
             <div class="form-group">
                 <input type="text" id="repoName<%= index + 1 %>" name="repoNames[]" class="repo-name-input" placeholder="프로젝트명 입력" value="<%= project.repoName %>" required>
-                <input type="text" id="localRepoPath<%= index + 1 %>" name="projects[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" value="<%= project.repoUrl %>" required>
+                <input type="text" id="workspacePath<%= index + 1 %>" name="workspacePaths[]" class="repo-input" placeholder="프로젝트 저장 위치 입력" value="<%= project.workspacePath %>" required>
                 <button type="button" class="remove-button" onclick="removeRepoField(this)">
                     <img src="/images/trash.svg" alt="Remove" class="trash-icon">
                 </button>
@@ -124,18 +124,11 @@
         <div id="codesonar-details" class="details" style="display: none;">
             <div class="form-group">
                 <label for="codesonar-path">프로젝트 저장 위치</label>
-                <input type="text" id="codesonar-path" name="codesonar-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.codesonarPath %>"><button type="button" onclick="browseFile('codesonar-path')">검색</button>
+                <input type="text" id="codesonar-path" name="codesonar-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.projects[0].codesonarPath %>"><button type="button" onclick="browseFile('codesonar-path')">검색</button>
             </div>
             <div class="form-group">
                 <label for="codesonar-report-path">레포트 저장 위치&nbsp;</label>
-                <input type="text" id="codesonar-report-path" name="codesonar-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.codesonarReportPath %>"><button type="button" onclick="browseFile('codesonar-report-path')">검색</button>
-            </div>
-            <div class="form-group file-upload-wrapper">
-                <label for="codesonar-upload">시작 스크립트</label>
-                <input type="file" id="codesonar-upload" name="codesonar-upload" class="file-upload-input" onchange="displayFileName(this)">
-                <% if (settings.codesonarScriptPath) { %>
-                    <p>Uploaded script: <%= settings.codesonarScriptPath %></p>
-                <% } %>
+                <input type="text" id="codesonar-report-path" name="codesonar-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.projects[0].codesonarReportPath %>"><button type="button" onclick="browseFile('codesonar-report-path')">검색</button>
             </div>
         </div>
 
@@ -151,18 +144,11 @@
         <div id="helix-details" class="details" style="display: none;">
             <div class="form-group">
                 <label for="helix-path">프로젝트 저장 위치</label>
-                <input type="text" id="helix-path" name="helix-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.helixPath %>"><button type="button" onclick="browseFile('helix-path')">검색</button>
+                <input type="text" id="helix-path" name="helix-path" class="repo-input" placeholder="Enter Artifact Directory Path" value="<%= settings.projects[0].helixPath %>"><button type="button" onclick="browseFile('helix-path')">검색</button>
             </div>
             <div class="form-group">
                 <label for="helix-report-path">레포트 저장 위치&nbsp;</label>
-                <input type="text" id="helix-report-path" name="helix-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.helixReportPath %>"><button type="button" onclick="browseFile('helix-report-path')">검색</button>
-            </div>
-            <div class="form-group file-upload-wrapper">
-                <label for="helix-upload">시작 스크립트</label>
-                <input type="file" id="helix-upload" name="helix-upload" class="file-upload-input" onchange="displayFileName(this)">
-                <% if (settings.helixScriptPath) { %>
-                    <p>Uploaded script: <%= settings.helixScriptPath %></p>
-                <% } %>
+                <input type="text" id="helix-report-path" name="helix-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.projects[0].helixReportPath %>"><button type="button" onclick="browseFile('helix-report-path')">검색</button>
             </div>
         </div>
 
@@ -178,18 +164,11 @@
         <div id="vectorcast-details" class="details" style="display: none;">
             <div class="form-group">
                 <label for="vectorcast-path">프로젝트 저장 위치</label>
-                <input type="text" id="vectorcast-path" name="vectorcast-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.vectorcastPath %>"><button type="button" onclick="browseFile('vectorcast-path')">검색</button>
+                <input type="text" id="vectorcast-path" name="vectorcast-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.projects[0].vectorcastPath %>"><button type="button" onclick="browseFile('vectorcast-path')">검색</button>
             </div>
             <div class="form-group">
                 <label for="vectorcast-report-path">레포트 저장 위치&nbsp;</label>
-                <input type="text" id="vectorcast-report-path" name="vectorcast-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.vectorcastReportPath %>"><button type="button" onclick="browseFile('vectorcast-report-path')">검색</button>
-            </div>
-            <div class="form-group">
-                <label for="vectorcast-upload">시작 스크립트</label>
-                <input type="file" id="vectorcast-upload" name="vectorcast-upload" class="file-upload-input" onchange="displayFileName(this)">
-                <% if (settings.vectorcastScriptPath) { %>
-                    <p>Uploaded script: <%= settings.vectorcastScriptPath %></p>
-                <% } %>
+                <input type="text" id="vectorcast-report-path" name="vectorcast-report-path" class="repo-input" placeholder="리포트 저장 위치를 입력하세요" value="<%= settings.projects[0].vectorcastReportPath %>"><button type="button" onclick="browseFile('vectorcast-report-path')">검색</button>
             </div>
         </div>
 

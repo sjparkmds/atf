@@ -151,7 +151,7 @@ function addProjectField(projectName) {
     const newField = document.createElement('div');
     newField.className = 'card-group';
     newField.innerHTML = `
-        <div class="card quarter-width"><h1 class="card-title">${projectName}</h1><button>자세히보기</button></div>
+        <div class="card quarter-width"><h1 class="card-title">${projectName}</h1></div>
         <div class="card quarter-width quarter-width-inactive">
             <div class="inactive"><h2>Helix QAC</h2><p>Not Available</p></div>
         </div>
@@ -177,7 +177,7 @@ function addProjectField(projectName) {
 
 <div class="container card-group">
 
-    <div class="card quarter-width"><h1 class="card-title">Project</h1><button>자세히보기</button></div>
+    <div class="card quarter-width"><h1 class="card-title">Project</h1></div>
 
     <div class="card quarter-width <%= helixSummary ? '' : 'quarter-width-inactive' %>">
         <% if (helixSummary) { %>
