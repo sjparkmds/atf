@@ -46,15 +46,7 @@ passport.use(new BasicStrategy(
 
 function formatDate(dateStr) {
     const date = new Date(dateStr);
-    return date.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        weekday: 'short',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-    });
+    return date.toLocaleString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric' });
 }
 
 let settings;
@@ -96,8 +88,6 @@ function findLatestFileInDirectory(directory, filePattern) {
         await initializePipelines(settings); // Initialize pipelines
         console.log('Pipeline state after initialization:', JSON.stringify(pipelineState, null, 2));
 
-
-        // Define routes
         app.get('/', async (req, res) => {
             try {
                 const project = settings.projects[0];
@@ -289,20 +279,13 @@ function extractSummary(html) {
 
 // Codesonar
 function parseCodeSonarOutput(data) {
-    // Assuming `data` is the content of the `codesonar_output.txt` file
-
+    const lines = data.split('\n');
     let totalWarnings = 0;
     let lastRunTime = '';
-    const filePaths = new Set();
 
-    const lines = data.split('\n');
     lines.forEach(line => {
-        if (line.startsWith('  Reporting')) {
+        if (line.includes('WARNING')) {
             totalWarnings++;
-            const filePathMatch = line.match(/at (.*?):\d+/);
-            if (filePathMatch) {
-                filePaths.add(filePathMatch[1]);
-            }
         }
         if (line.includes('Time Elapsed')) {
             const match = line.match(/\[(.*?)\]/);
@@ -312,20 +295,15 @@ function parseCodeSonarOutput(data) {
         }
     });
 
-    // Format lastRunTime if it was extracted
-    lastRunTime = lastRunTime ? formatDate(lastRunTime) : new Date().toLocaleString();
-
     const result = {
         totalWarnings,
-        lastRunTime,
-        uniqueFilePaths: Array.from(filePaths) // If you need the list of unique file paths
+        lastRunTime: formatDate(lastRunTime)
     };
 
-    // Save the result to a JSON file
     saveDataToFile(result, path.join(__dirname, 'public', 'data', 'codesonar.json'));
-
     return result;
 }
+
 
 // -------------------------------------------------------------------------------------------
 
@@ -550,7 +528,7 @@ app.get('/logs', async (req, res) => {
                 timestamp: helixEntry.timestamp || codesonarEntry.lastRunTime || vectorcastEntry.created || 'N/A',
                 project: settings.projects[0].repoName || 'Unknown Project',
                 helixQAC: helixEntry.rulesWithViolations !== undefined ? helixEntry.rulesWithViolations : 'N/A',
-                codesonar: codesonarEntry.activeWarnings !== undefined ? codesonarEntry.activeWarnings : 'N/A',
+                codesonar: codesonarEntry.totalWarnings !== undefined ? codesonarEntry.totalWarnings : 'N/A',
                 vectorcast: vectorcastEntry.passFail !== undefined ? vectorcastEntry.passFail : 'N/A'
             };
 
@@ -609,7 +587,7 @@ app.get('/vectorcast', (req, res) => {
 });
 
 app.get('/codesonar-summary', (req, res) => {
-    const repoName = settings.projects[0].repoName; // Example: Select the first project
+    const repoName = settings.projects[0].repoName; 
     const codesonarSummary = parseCodeSonarOutput(repoName);
     
     if (codesonarSummary) {

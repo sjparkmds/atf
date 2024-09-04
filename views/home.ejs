@@ -125,7 +125,7 @@ if (helixSummary) {
 
 function updateCodeSonarResults(codesonarSummary) {
     if (codesonarSummary) {
-        document.querySelector('.codesonar-summary h1').textContent = codesonarSummary.activeWarnings;
+        document.querySelector('.codesonar-summary h1').textContent = codesonarSummary.totalWarnings;
         const rateElement = document.querySelector('.codesonar-summary h3');
     } else {}
 }
@@ -189,7 +189,7 @@ function addProjectField(projectName) {
     
     <div class="card quarter-width <%= codesonarSummary ? '' : 'quarter-width-inactive' %>">
         <% if (codesonarSummary) { %>
-            <div><h1 class="card-big-number"><%= codesonarSummary.activeWarnings %></h1></div><p>Active Warnings</p>
+            <div><h1 class="card-big-number"><%= codesonarSummary.totalWarnings %></h1></div><p>Active Warnings</p>
         <% } else { %>
             <div class="inactive"><h2>CodeSonar</h2><br><p>Not Available</p></div>
         <% } %>

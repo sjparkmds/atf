@@ -1,0 +1,21 @@
+Empty Branch Statement
+Empty for Statement
+Empty if Statement
+Empty switch Statement
+Empty while Statement
+Explicit Zero Alignment
+Free Null Pointer
+Missing Non-default Association
+in C Generic
+Redundant Condition
+Selection in C Generic not
+Expanded from Macro
+Parameters
+Unreachable Call
+Unreachable Catch
+Unreachable Computation
+Unreachable Conditional
+Unreachable Control Flow
+Unreachable Data Flow
+Unused Value
+Useless Assignment
