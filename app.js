@@ -125,27 +125,12 @@ function findLatestFileInDirectory(directory, filePattern) {
                     codesonarSummary = parseCodeSonarOutput(data);
                 }
 
-                const now = new Date().toLocaleString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    second: 'numeric'
-                });
+                const now = new Date().toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
 
                 const projects = settings.projects || [];
 
                 const completionTime = pipelineState[repoName].completionTime 
-                    ? pipelineState[repoName].completionTime.toLocaleString('ko-KR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                        second: 'numeric'
-                    })
-                    : null;
+                    ? pipelineState[repoName].completionTime.toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }) : null;
 
                 res.render('home', {
                     helixSummary,
