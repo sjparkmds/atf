@@ -40,6 +40,27 @@
     
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+const darkModeToggle = document.getElementById('darkModeToggle');
+const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+
+if (isDarkMode) {
+    document.body.classList.add('dark-mode');
+    darkModeToggle.checked = true;
+}
+
+// Toggle dark mode
+darkModeToggle.addEventListener('change', () => {
+    if (darkModeToggle.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', 'enabled');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', 'disabled');
+    }
+});
+});
+
     let repoCount = <%= settings.projects.length %>; // Initialize based on existing projects
 
     function addRepoField() {
@@ -86,6 +107,8 @@
 <form action="/settings" method="post" enctype="multipart/form-data">
 
 <div class="settings-container">
+    
+    <div class="submit-container"><button type="submit" class="submit-button">설정 저장하기</button></div>
 
     <!-- Left Pane -->
     <div class="card half-width settings-page left-pane">
@@ -174,9 +197,21 @@
 
     </div>
 
-    <div class="submit-container"><button type="submit" class="submit-button">설정 저장하기</button></div>
     
 </div>
+
+<div class="container settings-page">
+    <div class="card half-width left-pane">
+        <h2>화면 설정</h2>
+        <div class="form-group">
+            <label for="darkModeToggle">다크모드</label>
+            <label class="switch">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    </div>
 
 </form>
 

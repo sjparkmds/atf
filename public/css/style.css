@@ -6,6 +6,109 @@ html, body {
     box-sizing: border-box;
 }
 
+body.dark-mode, body.dark-mode html {
+    background-color: #121212; /* Dark background */
+    color: #E0E0E0; /* Light text color for contrast */
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body.dark-mode .header {
+    background-color: #1E1E1E; /* Darker header background */
+    color: #E0E0E0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .header .title-container h1 {
+    background: conic-gradient(#ff6b6b, #ffca3a, #8ac926, #1982c4, #6a4c93);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.dark-mode .menu-item {
+    background-color: #333333; /* Darker background for menu items */
+    color: #E0E0E0;
+}
+
+body.dark-mode .menu-item img.inactive {
+    filter: brightness(0.7); /* Adjust inactive icon brightness */
+}
+
+body.dark-mode .menu-item img.active {
+    filter: brightness(1.2); /* Adjust active icon brightness */
+}
+
+body.dark-mode .card {
+    background-color: #1E1E1E; /* Darker card background */
+    color: #E0E0E0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .global-progress-bar {
+    background-color: #333333; /* Darker progress bar background */
+}
+
+body.dark-mode .global-progress-bar .progress-bar {
+    background-color: #13a4cf; /* Keep the original color */
+}
+
+body.dark-mode button {
+    background-color: #333333; /* Darker button background */
+    color: #E0E0E0;
+}
+
+body.dark-mode button:hover {
+    background-color: #555555; /* Slightly lighter on hover */
+}
+
+body.dark-mode .container.settings-page {
+    background-color: #1E1E1E; /* Darker container background */
+    color: #E0E0E0;
+}
+
+body.dark-mode .highcharts-figure {
+    background-color: #1E1E1E; /* Adjust Highcharts container */
+    color: #E0E0E0;
+}
+
+body.dark-mode .highcharts-data-table th {
+    background-color: #333333; /* Darker table header */
+    color: #E0E0E0;
+}
+
+body.dark-mode .highcharts-data-table td {
+    background-color: #1E1E1E; /* Darker table cells */
+    color: #E0E0E0;
+}
+
+body.dark-mode .rate-increase {
+    color: #ff6b6b; /* Lighter red for better contrast */
+}
+
+body.dark-mode .rate-decrease {
+    color: #13a4cf; /* Keep the original color */
+}
+
+body.dark-mode .inactive {
+    color: #999999;
+}
+
+body.dark-mode .third-width-inactive, 
+body.dark-mode .card-third-width-inactive {
+    background-color: #2C2C2C;
+    color: #999999;
+}
+
+body.dark-mode .slider {
+    background-color: #555555; /* Darker switch background */
+}
+
+body.dark-mode input:checked + .slider {
+    background-color: #13a4cf;
+}
 
 .header {
     overflow: hidden;
@@ -646,7 +749,7 @@ label {
     font-size: 1em;
     margin-top: 15px 0px;
     border: 1px solid #ccc;
-    border-radius: 35px;
+    border-radius: 10px;
 }
 
 
@@ -656,7 +759,7 @@ label {
     font-size: 1em;
     margin-top: 15px 0px;
     border: 1px solid #ccc;
-    border-radius: 35px;
+    border-radius: 10px;
 }
 
 .details {
@@ -794,16 +897,157 @@ label {
 }
 
 
-
 @media (max-width: 768px) {
-    .half-width,
-    .third-width {
-        flex: 1 1 calc(50% - 40px);
-        max-width: calc(50% - 40px);
+    body.dark-mode .header {
+        background-color: #1E1E1E;
+    }
+
+    body.dark-mode .menu-item {
+        background-color: #333333;
+    }
+
+    body.dark-mode .card {
+        background-color: #1E1E1E;
+    }
+
+    body.dark-mode button {
+        background-color: #333333;
+    }
+
+    .header {
+        padding: 10px 20px;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header .logo img {
+        height: 40px;
+    }
+
+    .header .title-container {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .menu-item {
+        height: 60px;
+        width: 80px;
+    }
+
+    .menu-container {
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .qrcode.img {
+        width: 50%; 
+        margin-left: 30px;
+        margin-bottom: 10px;
+    }
+
+    .half-width {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .card.third-width {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .card-title {
+        font-size: 1.5em;
+    }
+
+    .card-big-number {
+        font-size: 3em;
+    }
+
+    .content-chart {
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .content-chart .text-section,
+    .content-chart .chart-section {
+        width: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin: 5px 0;
+        padding-bottom: 0 !important;
+    }
+
+    button, .chart-button {
+        padding: 10px 30px;
+        font-size: 1em;
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    .container.progress-bar-container {
+        flex-direction: column;
+        padding: 10px 15px;
+        justify-content: center;
+    }
+
+    .global-progress-bar {
+        width: 80%;
+        margin: 10px 0;
+    }
+
+    #completion-time {
+        padding-right: 0;
+        font-size: 16px;
+        text-align: center;
+    }
+
+    .highcharts-figure {
+        padding: 5px;  
+        margin-bottom: 5px !important;
+        max-width: 100%;
+    }
+
+    .highcharts-data-table table {
+        font-size: 1.5em;
     }
 }
 
+
 @media (max-width: 480px) {
+    body.dark-mode .global-progress-bar {
+        background-color: #333333;
+    }
+
+    body.dark-mode .highcharts-figure {
+        background-color: #1E1E1E;
+    }
+
+    .container.progress-bar-container {
+        padding: 5px 10px;
+    }
+
+    .global-progress-bar {
+        width: 90%;
+        height: 15px;
+    }
+
+    #completion-time {
+        font-size: 14px;
+        padding-right: 0;
+        text-align: center;
+    }
+
+
+    button, .chart-button {
+        padding: 8px 20px;
+        font-size: 0.9em;
+        margin: 15px 0;
+    }
+
     .half-width,
     .third-width {
         flex: 1 1 100%;
@@ -813,66 +1057,34 @@ label {
     .content-chart {
         flex-direction: column;
         align-items: center;
+        margin-bottom: 0 !important; 
+        padding-bottom: 0 !important; 
     }
 
     .content-chart .text-section,
     .content-chart .chart-section {
-        display: flex;
-        flex-direction: column;
+        padding-left: 5px;
+        padding-right: 5px;
+        margin: 5px 0;
+        padding-bottom: 0 !important;
+    }
+
+    .highcharts-figure {
+        padding: 5px;
+        margin-bottom: 5px !important; 
+        max-width: 100%;
+    }
+
+    .highcharts-data-table table {
+        font-size: 1em;
+    }
+
+    .menu-container {
         justify-content: center;
-        padding-left: 60px;
-        padding-right: 60px;
-        margin: 30px;
-        width: 48%;
+        margin-top: 10px;
     }
 }
 
-.highcharts-figure {
-    margin: 1em auto;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #fff;  
-
-}
-
-.highcharts-title {
-    font-size: 2em !important;
-    padding-bottom: 20px !important;
-}
-
-.highcharts-data-table table {
-    width: 100%;
-    margin: 10px auto;
-    border-collapse: collapse;
-    border: 1px solid #ebebeb;
-    font-family: Verdana, sans-serif;
-    text-align: center;
-    color: #333;
-}
-
-.highcharts-data-table caption {
-    padding: 1em 0;
-    font-size: 1.5em;
-    color: #555;
-}
-
-.highcharts-data-table th,
-.highcharts-data-table td {
-    padding: 0.5em;
-}
-
-.highcharts-data-table th {
-    font-weight: 600;
-    background-color: #f8f8f8;
-}
-
-.highcharts-data-table tr:nth-child(even) {
-    background-color: #f8f8f8;
-}
-
-.highcharts-data-table tr:hover {
-    background-color: #f1f7ff; 
-}
 
 @media (max-width: 600px) {
     .highcharts-figure {
