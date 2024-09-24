@@ -48,62 +48,49 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    let currentPath = window.location.pathname;
-    currentPath = currentPath === '' || currentPath === '/' ? '/' : currentPath.replace(/\/$/, '');
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => {
-        const href = item.getAttribute('href');
-        if (href === currentPath) { item.classList.add('active'); }
-    });
-
     pollProgress(); 
     updateTime(); 
-    setInterval(updateTime, 1000);
-    refreshPageData;
+    setInterval(updateTime, 1000); // 1 second
+    applyDarkMode();
 });
 
 let hasCompleted = false;
 
 function pollProgress() {
-const intervalId = setInterval(() => {
-    fetch('/pipeline-progress')
-        .then(response => response.json())
-        .then(data => {
-            if (data.progress === undefined) {
-                throw new Error('Progress data is missing');
-            }
-            updateProgressBar(data.progress);
-            
-            if (data.progress === 100) {
-                clearInterval(intervalId);  // Stop polling once progress reaches 100%
-                hasCompleted = true;        // Set flag to true to prevent repeated refresh
-                fetchCompletionTime();      // Fetch the final completion time
-            } else {
-                fetchCompletionTime(); // Continue to fetch completion time if progress < 100%
-            }
-        })
-        .catch(error => {
-            clearInterval(intervalId); 
-            console.error('Error fetching pipeline progress:', error.message);
-        });
-}, 1000); // Poll every second
+    const intervalId = setInterval(() => {
+        fetch('/pipeline-progress')
+            .then(response => response.json())
+            .then(data => {
+                if (data.progress === undefined) {
+                    throw new Error('Progress data is missing');
+                }
+                updateProgressBar(data.progress);
+
+                if (data.progress === 100) {
+                    clearInterval(intervalId); // Stop polling once progress reaches 100%
+                    fetchCompletionTime();     
+                    refreshPageData();     
+                }
+            })
+            .catch(error => {
+                clearInterval(intervalId);
+                console.error('Error fetching pipeline progress:', error.message);
+            });
+    }, 1000); // 1 sec
 }
 
 function fetchCompletionTime() {
-    fetch('/completion-time')
-        .then(response => response.json())
-        .then(data => {
-            if (data.completionTime) {
-                document.getElementById('completion-time').textContent = '완료 시각 : ' + data.completionTime;
-            } else {
-                document.getElementById('completion-time').textContent = ''; // Clear if no completion time
-                console.error('Completion time is missing');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching completion time:', error.message);
-        });
-}
+        fetch('/completion-time')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('completion-time').textContent = data.completionTime 
+                    ? '완료 시각 : ' + data.completionTime 
+                    : '';
+            })
+            .catch(error => {
+                console.error('Error fetching completion time:', error.message);
+            });
+    }
 
 function updateProgressBar(percentage) {
     const progressBar = document.getElementById('progress-bar');

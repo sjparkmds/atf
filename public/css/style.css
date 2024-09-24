@@ -1,14 +1,14 @@
 html, body {
     overflow-x: hidden; /* Prevents horizontal scrolling */
-    overflow-y: scroll; /* Ensures vertical scrollbar is always visible */
+    overflow-y: scroll;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 body.dark-mode, body.dark-mode html {
-    background-color: #121212; /* Dark background */
-    color: #E0E0E0; /* Light text color for contrast */
+    background-color: #121212;
+    color: #E0E0E0;
     overflow-x: hidden;
     overflow-y: scroll;
     margin: 0;
@@ -17,79 +17,82 @@ body.dark-mode, body.dark-mode html {
 }
 
 body.dark-mode .header {
-    background-color: #1E1E1E; /* Darker header background */
+    background-color: #1E1E1E;
     color: #E0E0E0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-body.dark-mode .header .title-container h1 {
-    background: conic-gradient(#ff6b6b, #ffca3a, #8ac926, #1982c4, #6a4c93);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
 body.dark-mode .menu-item {
-    background-color: #333333; /* Darker background for menu items */
     color: #E0E0E0;
 }
 
 body.dark-mode .menu-item img.inactive {
-    filter: brightness(0.7); /* Adjust inactive icon brightness */
+    filter: brightness(0.7);
 }
 
 body.dark-mode .menu-item img.active {
-    filter: brightness(1.2); /* Adjust active icon brightness */
+    filter: brightness(1.2);
 }
 
 body.dark-mode .card {
-    background-color: #1E1E1E; /* Darker card background */
+    background-color: #1E1E1E;
     color: #E0E0E0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 3px solid #464444;
+}
+body.dark-mode .card.left-pane,
+body.dark-mode .card.right-pane {
+    background-color: #1E1E1E;
+    color: #E0E0E0;
+    border: 3px solid #464444;
+}
+
+body.dark-mode .submit-container {
+    background-color: #1E1E1E;
+    color: #E0E0E0;
 }
 
 body.dark-mode .global-progress-bar {
-    background-color: #333333; /* Darker progress bar background */
+    background-color: #333333;
 }
 
 body.dark-mode .global-progress-bar .progress-bar {
-    background-color: #13a4cf; /* Keep the original color */
-}
-
-body.dark-mode button {
-    background-color: #333333; /* Darker button background */
-    color: #E0E0E0;
+    background-color: #13a4cf;
 }
 
 body.dark-mode button:hover {
-    background-color: #555555; /* Slightly lighter on hover */
+    background-color: #555555;
+}
+
+body.dark-mode label {
+    color: white;
 }
 
 body.dark-mode .container.settings-page {
-    background-color: #1E1E1E; /* Darker container background */
+    background-color: #1E1E1E;
     color: #E0E0E0;
 }
 
 body.dark-mode .highcharts-figure {
-    background-color: #1E1E1E; /* Adjust Highcharts container */
+    background-color: #1E1E1E;
     color: #E0E0E0;
 }
 
 body.dark-mode .highcharts-data-table th {
-    background-color: #333333; /* Darker table header */
+    background-color: #333333;
     color: #E0E0E0;
 }
 
 body.dark-mode .highcharts-data-table td {
-    background-color: #1E1E1E; /* Darker table cells */
+    background-color: #1E1E1E;
     color: #E0E0E0;
 }
 
 body.dark-mode .rate-increase {
-    color: #ff6b6b; /* Lighter red for better contrast */
+    color: #ff6b6b;
 }
 
 body.dark-mode .rate-decrease {
-    color: #13a4cf; /* Keep the original color */
+    color: #13a4cf;
 }
 
 body.dark-mode .inactive {
@@ -110,10 +113,16 @@ body.dark-mode input:checked + .slider {
     background-color: #13a4cf;
 }
 
+body.dark-mode .quarter-width-inactive, 
+body.dark-mode .card-quarter-width-inactive {
+    background-color: #2C2C2C;
+    color: #999999;
+}
+
 .header {
     overflow: hidden;
     background-color: white;
-    padding: 30px 60px 30px 60px;
+    padding: 40px 60px 30px 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -145,6 +154,7 @@ body.dark-mode input:checked + .slider {
     font-size: 3em;
     background: conic-gradient(#553c9a, #ee4b2b, #00c2cb, #553c9a);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -317,6 +327,8 @@ body.dark-mode input:checked + .slider {
     box-sizing: border-box;
     text-align: left;
     justify-content: space-between;
+    overflow: hidden; /* Prevents content overflow */
+    max-height: 100%; /* Ensures the card doesn’t expand beyond its container */
 }
 
 #buttons {
@@ -461,8 +473,6 @@ body.dark-mode input:checked + .slider {
     100%  { transform: translateX(0)}
   }
   
-
-
 .full-width {
     flex: 1 1 100%;
     max-width: 100%;
@@ -556,8 +566,11 @@ body.dark-mode input:checked + .slider {
 }
 
 .chart-container {
-    position: relative;
-    height: 200px;
+    overflow: hidden;
+    height: auto;
+    max-height: 300px;
+    padding: 10px;
+    margin-bottom: 0 !important;
 }
 
 .content-chart {
@@ -612,7 +625,22 @@ button:not(.remove-button):not(.git-button):hover {
 
 .tool-logo {
     cursor: pointer;
-    width: 15%;
+    width: 25%;
+}
+
+body.dark-mode .dark-mode-label {
+    background-color: #333333;
+    border-color: #555555;
+    color: #E0E0E0 !important;
+}
+
+.dark-mode-label {
+    background-color: #F2F2F2;
+    border: solid 0.5px #e2e0e0;
+    border-radius: 35px;
+    padding: 13px 55px;
+    margin: 10px;
+    color: #424242 !important;
 }
 
 .git-button,
@@ -649,13 +677,13 @@ button:not(.remove-button):not(.git-button):hover {
 
 .submit-container {
     width: 100%;
+    margin: 1em;
     display: flex;
-    justify-content: center;
-    padding-bottom: 20px;
+    justify-content: right;
+    padding-right: 4em;
     position: sticky;
     bottom: 0;
     background-color: white;
-    border-top: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .submit-button {
@@ -684,9 +712,9 @@ button:not(.remove-button):not(.git-button):hover {
 .switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
-    margin-left: auto;
+    width: 60px;
+    height: 34px;
+    margin-left: 20px;
 }
 
 .switch input {
@@ -704,16 +732,16 @@ button:not(.remove-button):not(.git-button):hover {
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-    border-radius: 24px;
+    border-radius: 34px;
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
-    left: 2px;
-    bottom: 2px;
+    height: 26px; 
+    width: 26px; 
+    left: 4px; 
+    bottom: 4px;
     background-color: white;
     transition: .4s;
     border-radius: 50%;
@@ -726,7 +754,6 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
-
 /* Form Styles */
 .form-group {
     display: flex;
@@ -875,7 +902,6 @@ label {
     border-radius: 35px;
 }
 
-
 .custom-file-upload-button {
     display: inline-block;
     width: 100%;
@@ -910,9 +936,6 @@ label {
         background-color: #1E1E1E;
     }
 
-    body.dark-mode button {
-        background-color: #333333;
-    }
 
     .header {
         padding: 10px 20px;
@@ -939,12 +962,6 @@ label {
     .menu-container {
         justify-content: center;
         margin-top: 10px;
-    }
-
-    .qrcode.img {
-        width: 50%; 
-        margin-left: 30px;
-        margin-bottom: 10px;
     }
 
     .half-width {
@@ -1093,7 +1110,17 @@ label {
     }
 
     .highcharts-data-table table {
-        font-size: 2em; 
+        font-size: 1em; 
     }
-}
 
+    .content-chart .chart-section {
+        display: none;
+    }
+
+    .menu-container {
+        margin-right: 0.1em;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+}

@@ -158,7 +158,7 @@ darkModeToggle.addEventListener('change', () => {
         <!-- Helix Settings -->
         <div class="form-group">
             <div class="tool-header">
-                <img src="/images/helix_logo.jpg" alt="Helix Logo" class="tool-logo" onclick="toggleDetails('helix-details')">
+                <img src="/images/helix_logo.png" alt="Helix Logo" class="tool-logo" onclick="toggleDetails('helix-details')">
                 <label class="switch">
                     <input type="checkbox" id="helix" name="helix" <%= settings.helix ? 'checked' : '' %>><span class="slider round"></span>
                 </label>
@@ -202,9 +202,9 @@ darkModeToggle.addEventListener('change', () => {
 
 <div class="container settings-page">
     <div class="card half-width left-pane">
-        <h2>화면 설정</h2>
+
         <div class="form-group">
-            <label for="darkModeToggle">다크모드</label>
+            <label class="dark-mode-label" for="darkModeToggle">다크모드</label>
             <label class="switch">
                 <input type="checkbox" id="darkModeToggle">
                 <span class="slider"></span>
